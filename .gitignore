@@ -29,4 +29,7 @@
 *.app
 
 build
+bib
+__pycache__
 .ycm_extra_conf.py
+
