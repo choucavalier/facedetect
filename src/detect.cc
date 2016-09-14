@@ -4,40 +4,35 @@
 #include <opencv2/opencv.hpp>
 
 #include "detect.hh"
+#include "window.hh"
+#include "classification.hh"
 
-// a window that might contain a face
-struct window
+std::vector<bbox> detect(const std::string &img_path,
+                         const std::string &classifier_path)
 {
-  // basic constructor
-  window(double x, double y, double w, double h) : x(x), y(y), w(w), h(h) {}
-  // absolute offset
-  double x;
-  double y;
-  // rectangle dimensions
-  double w, h;
-};
-
-// get all windows potentially containing a face
-std::vector<window> get_potential_windows(cv::Size img_size)
-{
-  return {};
-}
-
-// aggregates windows into bounding boxes
-// img_size is needed to make sure the bounding box isn't out of bound
-static std::vector<bbox> aggregate_windows(cv::Size img_size,
-                                           std::vector<window> windows)
-{
-  return {};
-}
-
-std::vector<bbox> detect(std::string img_path)
-{
+  // load image from file
   cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_GRAYSCALE);
-  cv::Size img_size = img.size();
+  int img_width = img.rows;
+  int img_height = img.cols;
 
-  std::vector<window> potential_windows = get_potential_windows(img_size);
+  // compute integral image
+  cv::Mat integral;
+  cv::integral(img, integral);
+
+  // load classifier from file
+  mblbp_classifier classifier = load_classifier(classifier_path);
+
+  std::vector<window> potential_windows = get_potential_windows(img_width,
+                                                                img_height);
   std::vector<window> positive_windows;
 
-  return aggregate_windows(img_size, positive_windows);
+  for(const auto &potential_window : potential_windows)
+  {
+    bool positive = classifier.classify(integral, potential_window);
+
+    if(positive)
+      positive_windows.push_back(potential_window);
+  }
+
+  return aggregate_windows(img_width, img_height, positive_windows);
 }

@@ -13,5 +13,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 include_directories ( include )
 
-add_executable(facedetect src/main.cc src/detect.cc)
+add_executable(facedetect src/window.cc src/mblbp.cc src/classification.cc src/detect.cc src/main.cc)
 target_link_libraries(facedetect ${OpenCV_LIBS})
