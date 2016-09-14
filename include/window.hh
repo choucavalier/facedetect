@@ -16,7 +16,9 @@ struct window
   // rectangle dimensions
   double w;
   double h;
-  // scaling of the initial window size
+  // scaling from the initial window size
+  // e.g. if the initial window size is set to 20x24
+  //      and the scale is set to 1.5
   double scale;
 };
 
@@ -39,4 +41,4 @@ std::vector<window> get_potential_windows(int img_width,
 // aggregates windows into bounding boxes
 // img_size is needed to make sure the bounding box isn't out of bound
 std::vector<bbox> aggregate_windows(int img_width, int img_height,
-                                           const std::vector<window> &windows);
+                                    const std::vector<window> &windows);

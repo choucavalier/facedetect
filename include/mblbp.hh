@@ -13,8 +13,10 @@ struct mblbp_feature
   int y; // vertical offset
   int block_width; // must be a multiple of 3
   int block_height; // must be a multiple of 3
-  int id;
 };
 
-std::vector<mblbp_feature> mblbp_extract_features(
-  const cv::Mat &int_img, const window &potential_window);
+using mblbp_features = std::vector<mblbp_feature>;
+
+int mblbp_calculate_feature(const cv::Mat &integral,
+                            const window &potential_window,
+                            const mblbp_feature &feature);

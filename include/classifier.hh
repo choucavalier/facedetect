@@ -8,22 +8,30 @@
 #include "mblbp.hh"
 #include "window.hh"
 
-struct weak_classifier
+class weak_classifier
 {
+public:
   weak_classifier(mblbp_feature feature) : feature(feature) {}
+  double evaluate(const cv::Mat &integral,
+                  const window &potential_window) const;
+private:
   mblbp_feature feature;
   double regression_parameters[255];
 };
 
-struct strong_classifier
+class strong_classifier
 {
-  bool classify(const std::vector<mblbp_feature> &mblbp_features) const;
+public:
+  bool classify(const cv::Mat &integral, const window &potential_window) const;
+private:
   std::vector<weak_classifier> weak_classifiers;
 };
 
-struct mblbp_classifier
+class mblbp_classifier
 {
+public:
   bool classify(const cv::Mat &integral, const window &potential_window) const;
+private:
   std::vector<strong_classifier> strong_classifiers;
 };
 

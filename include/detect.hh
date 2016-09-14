@@ -5,7 +5,6 @@
 
 #include "window.hh"
 
-
 /*
 ** Detect bounding boxes around faces in the given image
 */

@@ -5,7 +5,7 @@
 
 #include "detect.hh"
 #include "window.hh"
-#include "classification.hh"
+#include "classifier.hh"
 
 std::vector<bbox> detect(const std::string &img_path,
                          const std::string &classifier_path)
