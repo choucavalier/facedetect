@@ -4,6 +4,7 @@
 std::vector<window> get_potential_windows(const int img_width,
                                           const int img_height)
 {
+  // TODO
   return {};
 }
 
@@ -12,5 +13,6 @@ std::vector<window> get_potential_windows(const int img_width,
 std::vector<bbox> aggregate_windows(const int img_width, const int img_height,
                                     const std::vector<window> &windows)
 {
+  // TODO
   return {};
 }
