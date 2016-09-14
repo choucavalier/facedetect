@@ -4,4 +4,4 @@
 
 #include <opencv2/opencv.hpp>
 
-int mblbp_extract(cv::Mat integral_img);
+std::vector<int> mblbp_extract(cv::Mat integral_img);
