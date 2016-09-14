@@ -7,9 +7,7 @@ struct window
 {
   // basic constructor
   window(double x, double y, double w, double h, double scale)
-    : x(x), y(y), w(w), h(h), scale(scale)
-  {
-  }
+    : x(x), y(y), w(w), h(h), scale(scale) {}
   // absolute offset
   double x;
   double y;
@@ -24,10 +22,7 @@ struct window
 
 struct bbox
 {
-  bbox(int x, int y, int w, int h) : x(x), y(y), w(w), h(h)
-  {
-  }
-
+  bbox(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
   int x;
   int y;
   int w;

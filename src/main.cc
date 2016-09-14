@@ -16,4 +16,10 @@ int main(int argc, char **argv)
   std::cout << "detecting faces in " << argv[1] << std::endl;
 
   std::vector<bbox> bounding_boxes = detect(img_path, classifier_path);
+
+  for(const auto& box : bounding_boxes)
+  {
+    std::cout << "face at (x = " << box.x << ", y = " << box.y << ") "
+              << "width: " << box.w << ", height = " << box.h << std::endl;
+  }
 }
