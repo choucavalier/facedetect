@@ -4,8 +4,8 @@
 // get all windows potentially containing a face
 std::vector<window> get_potential_windows(const int img_w, const int img_h)
 {
-  double window_width = INITIAL_WINDOW_W;
-  double window_height = INITIAL_WINDOW_H;
+  double window_width = initial_window_w;
+  double window_height = initial_window_h;
   // TODO
   return {};
 }

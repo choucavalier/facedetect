@@ -20,10 +20,10 @@ int mblbp_calculate_feature(const cv::Mat &integral,
 std::vector<mblbp_feature> mblbp_all_features()
 {
   std::vector<mblbp_feature> features;
-  for(int block_w = MIN_BLOCK_SIZE; block_w <= MAX_BLOCK_SIZE; block_w += 3)
-    for(int block_h = MIN_BLOCK_SIZE; block_h <= MAX_BLOCK_SIZE; block_h += 3)
-      for(int x = 0; x <= INITIAL_WINDOW_W - block_w; ++x)
-        for(int y = 0; y <= INITIAL_WINDOW_H - block_h; ++y)
+  for(int block_w = min_block_size; block_w <= max_block_size; block_w += 3)
+    for(int block_h = min_block_size; block_h <= max_block_size; block_h += 3)
+      for(int x = 0; x <= initial_window_w - block_w; ++x)
+        for(int y = 0; y <= initial_window_h - block_h; ++y)
           features.push_back(mblbp_feature(x, y, block_w, block_h));
   return features;
 }
