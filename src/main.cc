@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "detect.hh"
+#include "mblbp.hh"
 
 int main(int argc, char **argv)
 {

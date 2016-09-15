@@ -12,8 +12,8 @@ std::vector<bbox> detect(const std::string &img_path,
 {
   // load image from file
   cv::Mat img = cv::imread(img_path, CV_LOAD_IMAGE_GRAYSCALE);
-  int img_width = img.rows;
-  int img_height = img.cols;
+  int img_w = img.rows;
+  int img_h = img.cols;
 
   // compute integral image
   cv::Mat integral;
@@ -22,8 +22,8 @@ std::vector<bbox> detect(const std::string &img_path,
   // load classifier from file
   mblbp_classifier classifier = load_classifier(classifier_path);
 
-  std::vector<window> potential_windows = get_potential_windows(img_width,
-                                                                img_height);
+  std::vector<window> potential_windows = get_potential_windows(img_w,
+                                                                img_h);
   std::vector<window> positive_windows;
 
   for(const auto &potential_window : potential_windows)
@@ -34,5 +34,5 @@ std::vector<bbox> detect(const std::string &img_path,
       positive_windows.push_back(potential_window);
   }
 
-  return aggregate_windows(img_width, img_height, positive_windows);
+  return aggregate_windows(img_w, img_h, positive_windows);
 }

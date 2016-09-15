@@ -1,7 +1,9 @@
 #pragma once
 
 // default parameters used to detect faces
-int INITIAL_WINDOW_WIDTH = 20;
-int INITIAL_WINDOW_HEIGHT = 24;
-double SCALING_FACTOR = 1.25;
-double SHIFT_DELTA = 1.5;
+const int INITIAL_WINDOW_W = 20;
+const int INITIAL_WINDOW_H = 20;
+const int MIN_BLOCK_SIZE = 3;
+const int MAX_BLOCK_SIZE = 18;
+const double SCALING_FACTOR = 1.25;
+const double SHIFT_DELTA = 1.5;

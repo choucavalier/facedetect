@@ -30,9 +30,9 @@ struct bbox
 };
 
 // get all windows potentially containing a face
-std::vector<window> get_potential_windows(int img_width, int img_height);
+std::vector<window> get_potential_windows(int img_w, int img_h);
 
 // aggregates windows into bounding boxes
 // img_size is needed to make sure the bounding box isn't out of bound
-std::vector<bbox> aggregate_windows(int img_width, int img_height,
+std::vector<bbox> aggregate_windows(int img_w, int img_h,
                                     const std::vector<window> &windows);
