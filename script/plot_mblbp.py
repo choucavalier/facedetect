@@ -11,6 +11,9 @@ import matplotlib.animation as animation
 import matplotlib.image as mpimg
 from PIL import Image
 
+COLORS = ['#1a535c', '#4ecdc4', '#ff6b6b', '#ffe66d', '#ffe66d',
+          '#ff6b6b', '#4ecdc4', '#1a535c']
+
 def plot_animated_mblbp(window_w, window_h):
 
     dpi = 96
@@ -21,7 +24,7 @@ def plot_animated_mblbp(window_w, window_h):
 
     ax = plt.axes(xlim=(0, 20), ylim=(0, 20))
     ax.imshow(img, interpolation='none', cmap=plt.get_cmap('gray'),
-              extent=[0, 20, 20, 0])
+              extent=[0, 20, 20, 0], alpha=0.7)
     ax.set_ylim(ax.get_ylim()[::-1]) # invert y-axis
     ax.xaxis.tick_top() # move x-axis to the top
     ax.xaxis.set_ticks(range(1, 21))
@@ -52,10 +55,6 @@ def plot_animated_mblbp(window_w, window_h):
                     }
                     features.append(feature)
 
-    colors = '1a535c-4ecdc4-ff6b6b-ffe66d-f7fff7-ffe66d-ff6b6b-4ecdc4-1a535c'
-    colors = ['#{}'.format(c) for c in colors.split('-')]
-    patterns = ['x', 'o', 'O', '*']
-
     random.shuffle(features)
     sample = random.sample(features, 6)
 
@@ -63,8 +62,7 @@ def plot_animated_mblbp(window_w, window_h):
         rectangle = patches.Rectangle(
             (feature['offset_x'], feature['offset_y']),
             feature['block_w'], feature['block_h'],
-            facecolor=colors[i], linewidth=1, alpha=0.4,
-            # hatch=random.choice(patterns)
+            facecolor=COLORS[i], linewidth=1, alpha=0.4,
         )
         ax.add_patch(rectangle)
 
