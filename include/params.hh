@@ -1,6 +1,7 @@
 #pragma once
 
 // default parameters used to detect faces
-
-float SCALING_FACTOR = 1.25;
-float SHIFT_DELTA = 1.5;
+int INITIAL_WINDOW_WIDTH = 20;
+int INITIAL_WINDOW_HEIGHT = 24;
+double SCALING_FACTOR = 1.25;
+double SHIFT_DELTA = 1.5;
