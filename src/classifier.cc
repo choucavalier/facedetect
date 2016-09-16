@@ -7,11 +7,8 @@ bool mblbp_classifier::classify(const cv::Mat &integral,
                                 const window &potential_window) const
 {
   for(const auto& strong_classifier : this->strong_classifiers)
-  {
-    bool positive = strong_classifier.classify(integral, potential_window);
-    if(!positive)
+    if(!strong_classifier.classify(integral, potential_window))
       return false;
-  }
 
   return true;
 }
@@ -28,8 +25,9 @@ bool strong_classifier::classify(const cv::Mat &integral,
 double weak_classifier::evaluate(const cv::Mat &integral,
                                  const window &potential_window) const
 {
-  int feature_val = mblbp_calculate_feature(integral, potential_window,
-                                            this->feature);
+  int feature_value = mblbp_calculate_feature(integral, potential_window,
+                                              this->feature);
+  return this->regression_parameters[feature_value];
 }
 
 mblbp_classifier load_classifier(const std::string &path)
