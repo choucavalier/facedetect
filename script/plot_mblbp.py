@@ -18,12 +18,12 @@ def plot_animated_mblbp(window_w, window_h):
 
     dpi = 96
 
-    img = Image.open('gfx/prisca.jpg').convert('LA')
+    img = Image.open('gfx/tgy.jpg').convert('LA')
 
     fig = plt.figure(figsize=(dpi / 40, dpi / 40), dpi=dpi, frameon=False)
 
     ax = plt.axes(xlim=(0, 20), ylim=(0, 20))
-    ax.imshow(img, interpolation='none', cmap=plt.get_cmap('gray'),
+    ax.imshow(img, interpolation='nearest', cmap=plt.get_cmap('gray'),
               extent=[0, 20, 20, 0], alpha=0.7)
     ax.set_ylim(ax.get_ylim()[::-1]) # invert y-axis
     ax.xaxis.tick_top() # move x-axis to the top
@@ -65,6 +65,8 @@ def plot_animated_mblbp(window_w, window_h):
             facecolor=COLORS[i], linewidth=1, alpha=0.4,
         )
         ax.add_patch(rectangle)
+
+    plt.savefig('gfx/mblbp.svg', interpolation='nearest')
 
     plt.show()
 

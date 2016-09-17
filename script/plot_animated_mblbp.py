@@ -18,7 +18,7 @@ def plot_animated_mblbp(window_w, window_h):
 
     dpi = 96
 
-    img = Image.open('gfx/prisca.jpg').convert('LA')
+    img = Image.open('gfx/tgy.jpg').convert('LA')
 
     fig = plt.figure(figsize=(dpi / 40, dpi / 40), dpi=dpi, frameon=False)
 
