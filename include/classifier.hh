@@ -35,5 +35,8 @@ private:
   std::vector<strong_classifier> strong_classifiers;
 };
 
+// save a classifier
+void save_classifier(const mblbp_classifier &classifier,
+                     const std::string &output_path);
 // load a previously learned classifier from a file
-mblbp_classifier load_classifier(const std::string &path);
+mblbp_classifier load_classifier(const std::string &classifier_path);

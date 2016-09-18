@@ -5,7 +5,6 @@
 // a window that might contain a face
 struct window
 {
-  // basic constructor
   window(double x, double y, double w, double h, double scale)
     : x(x), y(y), w(w), h(h), scale(scale) {}
   // absolute offset
@@ -15,8 +14,6 @@ struct window
   double w;
   double h;
   // scaling from the initial window size
-  // e.g. if the initial window size is set to 20x24
-  //      and the scale is set to 1.5
   double scale;
 };
 
@@ -29,10 +26,38 @@ struct bbox
   int h;
 };
 
-// get all windows potentially containing a face
+/* Get all windows in the image that must be classified
+**
+** The classifier will be called for all of these windows
+**
+** Parameters
+** ----------
+** img_w, img_h : int
+**     Width and height of the image, needed to make sure the windows ar not out
+**     of bounds
+**
+** Return
+** ------
+** potential_windows : std::vector<window>
+**     All windows to classify
+*/
 std::vector<window> get_potential_windows(int img_w, int img_h);
 
-// aggregates windows into bounding boxes
-// img_size is needed to make sure the bounding box isn't out of bound
+/* Aggregate positive windows into bounding boxes
+**
+** Parameters
+** ----------
+** img_w, img_h : int
+**     Width and height of the image, needed to make sure the bounding boxes are
+**     not out of bound
+**
+** windows : const& std::vector<window>
+**     All positive windows found in the image
+**
+** Return
+** ------
+** bounding_boxes : std::vector<bbox>
+**     Bounding boxes around faces detected in the image
+*/
 std::vector<bbox> aggregate_windows(int img_w, int img_h,
                                     const std::vector<window> &windows);

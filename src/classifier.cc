@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include <opencv2/opencv.hpp>
 
 #include "classifier.hh"
@@ -28,6 +30,14 @@ double weak_classifier::evaluate(const cv::Mat &integral,
   int feature_value = mblbp_calculate_feature(integral, potential_window,
                                               this->feature);
   return this->regression_parameters[feature_value];
+}
+
+void save_classifier(const mblbp_classifier &classifier,
+                     const std::string output_path)
+{
+  std::ofstream of(output_path);
+
+  // TODO
 }
 
 mblbp_classifier load_classifier(const std::string &path)
