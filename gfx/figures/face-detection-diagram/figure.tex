@@ -1,0 +1,20 @@
+% http://www.texample.net/tikz/examples/nav1d/
+\documentclass[tikz,convert={outfile=\jobname.svg}]{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\begin{document}
+\pagestyle{empty}
+%
+\tikzstyle{int}=[draw, fill=blue!20, minimum size=3em]
+\tikzstyle{init} = [pin edge={to-,thin,black}]
+
+\begin{tikzpicture}[node distance=2.5cm,auto,>=latex']
+    \node [int] (a) {$f(x)$};
+    \node (b) [left of=a,node distance=3.5cm, coordinate] {a};
+    \node [coordinate] (end) [right of=a, node distance=3.5cm]{};
+    \path[->] (b) edge node {image/video} (a);
+    \path[->] (a) edge node {bounding boxes} (end);
+\end{tikzpicture}
+
+\end{document}
