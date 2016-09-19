@@ -53,6 +53,6 @@ unsigned char mblbp_calculate_feature(const cv::Mat &integral,
 ** Return
 ** ------
 ** features : std::vector<mblbp_feature>
-**     All features contained in the window
+**     All features contained in a window
 */
 std::vector<mblbp_feature> mblbp_all_features();

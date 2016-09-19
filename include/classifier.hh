@@ -45,6 +45,11 @@ struct strong_classifier
   **
   ** potential_window : window
   **     Window to classify as containing a face or not
+  **
+  ** Return
+  ** ------
+  ** positive : bool
+  **     Whether the window contains a face or not
   */
   bool classify(const cv::Mat &integral, const window &potential_window) const;
 
@@ -62,6 +67,11 @@ struct mblbp_classifier
   **
   ** potential_window : window
   **     Window to classify as containing a face or not
+  **
+  ** Return
+  ** ------
+  ** positive : bool
+  **     Whether the window contains a face or not
   */
   bool classify(const cv::Mat &integral, const window &potential_window) const;
 
