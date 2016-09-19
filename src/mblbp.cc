@@ -28,3 +28,11 @@ std::vector<mblbp_feature> mblbp_all_features()
           features.push_back(mblbp_feature(x, y, block_w, block_h));
   return features;
 }
+
+bool mblbp_feature::operator==(const mblbp_feature &other)
+{
+  return this->x == other.x &&
+         this->y == other.y &&
+         this->block_w == other.block_w &&
+         this->block_h == other.block_h;
+}

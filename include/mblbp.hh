@@ -10,6 +10,8 @@ struct mblbp_feature
 {
   mblbp_feature(int x, int y, int block_width, int block_height); // constructor
 
+  bool operator==(const mblbp_feature &other);
+
   int x, y; // horizontal (x, y) offset relative to the origin of the window
   int block_w; // block width, must be a multiple of 3
   int block_h; // block height, must be a multiple of 3

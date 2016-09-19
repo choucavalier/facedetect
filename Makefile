@@ -6,3 +6,9 @@ all:
 	@echo "---------- compilation done ----------"
 	@echo ""
 	./build/facedetect gfx/test.jpg
+
+test:
+	@./build/test_io
+
+test_%:
+	@./build/$@

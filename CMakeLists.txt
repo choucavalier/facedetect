@@ -19,4 +19,9 @@ add_executable(facedetect src/window.cc
                           src/detect.cc
                           src/main.cc)
 
+add_executable(test_io test/test_io.cc
+                       src/mblbp.cc
+                       src/classifier.cc
+                       src/window.cc)
+
 target_link_libraries(facedetect ${OpenCV_LIBS})
