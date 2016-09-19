@@ -5,10 +5,14 @@ all:
 	@echo ""
 	@echo "---------- compilation done ----------"
 	@echo ""
-	./build/facedetect gfx/test.jpg
+	@make --no-print-directory run
 
+run:
+	./build/facedetect gfx/test.jpg classifiers/dumb.txt
+
+.PHONY: test
 test:
-	@./build/test_io
+	@make --no-print-directory test_io
 
 test_%:
 	@./build/$@

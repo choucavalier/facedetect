@@ -30,6 +30,16 @@ std::vector<bbox> aggregate_windows(const int img_w, const int img_h,
                                     const std::vector<window> &windows)
 {
   std::vector<bbox> bounding_boxes;
-  // TODO
+
+  for(const auto& potential_window : windows)
+  {
+    int x, y, w, h;
+    x = potential_window.x;
+    y = potential_window.y;
+    w = potential_window.w;
+    h = potential_window.h;
+    bounding_boxes.push_back(bbox(x, y, w, h));
+  }
+
   return bounding_boxes;
 }

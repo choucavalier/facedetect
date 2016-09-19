@@ -1,24 +1,35 @@
 #include <iostream>
 #include <cmath>
-#include <random>
 
 #include "classifier.hh"
+
+static double random_double(const double lower_bound, const double upper_bound)
+{
+  double random = ((double) rand()) / (double) RAND_MAX;
+  double diff = upper_bound - lower_bound;
+  double r = random * diff;
+  return lower_bound + r;
+}
+
+static int random_int(const int lower_bound, const int upper_bound)
+{
+  return random_double(lower_bound, upper_bound);
+}
 
 weak_classifier random_weak_classifier()
 {
   mblbp_feature feature(0, 0, 9, 9);
-  return weak_classifier(feature);
+  weak_classifier classifier(feature);
+  for(int i = 0; i < 255; ++i)
+    classifier.regression_parameters[i] = random_double(-100.0, +100.0);
+  return classifier;
 }
 
 strong_classifier random_strong_classifier()
 {
   strong_classifier classifier;
 
-  std::mt19937 rng;
-  rng.seed(std::random_device()());
-  std::uniform_int_distribution<std::mt19937::result_type> dist(20, 100);
-
-  int n_wc = dist(rng); // number of weak_classifiers to generate
+  int n_wc = random_int(5, 10); // number of weak_classifiers to generate
 
   for(int i = 0; i < n_wc; ++i)
     classifier.weak_classifiers.push_back(random_weak_classifier());
@@ -30,7 +41,7 @@ mblbp_classifier random_classifier()
 {
   mblbp_classifier classifier;
 
-  int n_sc = 50; // number of strong_classifiers to generate
+  int n_sc = 5; // number of strong_classifiers to generate
 
   for(int i = 0; i < n_sc; ++i)
     classifier.strong_classifiers.push_back(random_strong_classifier());
