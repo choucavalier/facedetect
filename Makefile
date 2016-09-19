@@ -8,7 +8,7 @@ all:
 	@make --no-print-directory run
 
 run:
-	./build/facedetect gfx/test.jpg classifiers/dumb.txt
+	./build/detect gfx/test.jpg classifiers/dumb.txt
 
 .PHONY: test
 test:

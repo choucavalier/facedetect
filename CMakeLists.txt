@@ -13,15 +13,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 include_directories ( include )
 
-add_executable(facedetect src/window.cc
-                          src/mblbp.cc
-                          src/classifier.cc
-                          src/detect.cc
-                          src/main.cc)
+# detection
+add_executable(detect entry_point/detect.cc
+                      src/window.cc
+                      src/mblbp.cc
+                      src/classifier.cc
+                      src/detect.cc)
 
+
+# training
+add_executable(train entry_point/train.cc
+                     src/train.cc
+                     src/classifier.cc
+                     src/mblbp.cc
+                     src/window.cc)
+
+# tests
 add_executable(test_io test/test_io.cc
                        src/mblbp.cc
                        src/classifier.cc
                        src/window.cc)
 
-target_link_libraries(facedetect ${OpenCV_LIBS})
+target_link_libraries(detect ${OpenCV_LIBS})
+target_link_libraries(train ${OpenCV_LIBS})
