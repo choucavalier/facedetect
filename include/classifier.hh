@@ -8,27 +8,63 @@
 #include "mblbp.hh"
 #include "window.hh"
 
-class weak_classifier
+struct weak_classifier
 {
-public:
   weak_classifier(mblbp_feature feature) : feature(feature) {}
+
+  /* Calculate the weak_classifier value on a potential_window
+  **
+  ** Parameters
+  ** ----------
+  ** integral : cv::Mat
+  **     Integral image
+  **
+  ** potential_window : window
+  **     Window on which to evaluate the weak_classifier
+  **
+  ** Return
+  ** ------
+  ** regression_parameter : double
+  **     The learned regression parameter for feature_value
+  */
   double evaluate(const cv::Mat &integral,
                   const window &potential_window) const;
+
   mblbp_feature feature;
   double regression_parameters[255];
 };
 
-class strong_classifier
+struct strong_classifier
 {
-public:
+  /* Classify a window
+  **
+  ** Parameters
+  ** ----------
+  ** integral : cv::Mat
+  **     Integral image
+  **
+  ** potential_window : window
+  **     Window to classify as containing a face or not
+  */
   bool classify(const cv::Mat &integral, const window &potential_window) const;
+
   std::vector<weak_classifier> weak_classifiers;
 };
 
-class mblbp_classifier
+struct mblbp_classifier
 {
-public:
+  /* Classify a window
+  **
+  ** Parameters
+  ** ----------
+  ** integral : cv::Mat
+  **     Integral image
+  **
+  ** potential_window : window
+  **     Window to classify as containing a face or not
+  */
   bool classify(const cv::Mat &integral, const window &potential_window) const;
+
   std::vector<strong_classifier> strong_classifiers;
 };
 
@@ -55,13 +91,25 @@ public:
 **
 ** Parameters
 ** ----------
-** classifier : const& mblbp_classifier
+** classifier : mblbp_classifier
 **     The classifier to be saved
 **
-** output_path : const& std::string
+** output_path : std::string
 **     Path to the file in which the classifier should be saved
 */
 void save_classifier(const mblbp_classifier &classifier,
                      const std::string &output_path);
-// load a previously learned classifier from a file
+
+/* Load a classifier from a file
+**
+** Parameters
+** ----------
+** classifier_path : std::string
+**     Path to the saved classifier
+**
+** Return
+** ------
+** classifier : mblbp_classifier
+**     Loaded classifier
+*/
 mblbp_classifier load_classifier(const std::string &classifier_path);
