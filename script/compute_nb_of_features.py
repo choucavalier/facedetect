@@ -4,8 +4,10 @@
 
 def compute_nb_of_features(window_w, window_h):
     nb_of_features = 0
-    for block_w in range(3, window_w, 3):
-        for block_h in range(3, window_h, 3):
+    min_block_w, max_block_w = 3, 12
+    min_block_h, max_block_h = 3, 12
+    for block_w in range(min_block_w, max_block_w, 3):
+        for block_h in range(min_block_h, max_block_h, 3):
             for offset_x in range(window_w - block_w + 1):
                 for offset_y in range(window_h - block_h + 1):
                     nb_of_features += 1

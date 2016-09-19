@@ -35,12 +35,12 @@ using mblbp_features = std::vector<mblbp_feature>;
 **
 ** Return
 ** ------
-** feature_value : int
+** feature_value : unsigned char
 **     The calculated value of the feature
 */
-int mblbp_calculate_feature(const cv::Mat &integral,
-                            const window &potential_window,
-                            const mblbp_feature &feature);
+unsigned char mblbp_calculate_feature(const cv::Mat &integral,
+                                      const window &potential_window,
+                                      const mblbp_feature &feature);
 
 /* Generate all MB-LBP features inside a window
 ** The size of the window is defined in "parameters.hh"
