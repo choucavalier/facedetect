@@ -8,8 +8,8 @@ int main(int argc, char **argv)
 {
   if(argc < 4)
   {
-    std::cout << "usage: ./train data/positives data/negatives "
-              << "output_classifier_path" << std::endl;
+    std::cout << "usage: ./train data/positives data/negatives classifier.txt"
+              << std::endl;
     return 1;
   }
 

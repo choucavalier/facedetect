@@ -7,8 +7,6 @@ std::vector<window> get_potential_windows(const int img_w, const int img_h)
 
   double w = initial_window_w; // current window width
   double h = initial_window_h; // current window height
-  double x = 0.0; // current horizontal offset
-  double y = 0.0; // current vertical offset
   double scale = 1.0; // current scale
 
   while(w <= max_window_w && h <= max_window_h)
@@ -40,6 +38,8 @@ std::vector<bbox> aggregate_windows(const int img_w, const int img_h,
     h = potential_window.h;
     bounding_boxes.push_back(bbox(x, y, w, h));
   }
+
+  // TODO
 
   return bounding_boxes;
 }
