@@ -5,9 +5,10 @@
 #include "train.hh"
 
 namespace fs = std::experimental::filesystem;
+using data_t = std::pair<std::string, bool>;
 
-static std::vector<std::pair<std::string, bool>> load_data(
-  const std::string &positive_path, const std::string &negative_path)
+static std::vector<data_t> load_data(const std::string &positive_path,
+                                     const std::string &negative_path)
 {
   std::vector<std::pair<std::string, bool>> data;
 
@@ -20,7 +21,7 @@ static std::vector<std::pair<std::string, bool>> load_data(
   return data;
 }
 
-static void shuffle_data(std::vector<std::pair<std::string, bool>> &data)
+static void shuffle_data(std::vector<data_t> &data)
 {
   std::random_device rd;
   std::mt19937 g(rd());
