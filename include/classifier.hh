@@ -10,7 +10,7 @@
 
 struct weak_classifier
 {
-  weak_classifier(mblbp_feature feature) : feature(feature) {}
+  weak_classifier(const mblbp_feature &feature) : feature(feature) {}
 
   /* Calculate the weak_classifier value on a potential_window
   **

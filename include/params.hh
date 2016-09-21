@@ -13,3 +13,7 @@ const double shift_delta = 1.5;
 // training parameters
 const double target_detection_rate = 0.92;
 const double target_fp_rate = 0.01;
+// number of strong classifiers (stages) to learn
+const int train_n_strong = 5;
+// number of weak classifiers to select per strong classifier
+const int train_n_weak_per_strong = 10;

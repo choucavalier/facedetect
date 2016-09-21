@@ -14,6 +14,25 @@
 namespace fs = std::experimental::filesystem;
 using data_t = std::vector<std::pair<std::string, bool>>;
 
+/* Generate all MB-LBP features inside a window
+** The size of the window is defined in "parameters.hh"
+**
+** Return
+** ------
+** features : std::vector<mblbp_feature>
+**     All features contained in a window
+*/
+static std::vector<mblbp_feature> mblbp_all_features()
+{
+  std::vector<mblbp_feature> features;
+  for(int block_w = min_block_size; block_w <= max_block_size; block_w += 3)
+    for(int block_h = min_block_size; block_h <= max_block_size; block_h += 3)
+      for(int x = 0; x <= initial_window_w - block_w; ++x)
+        for(int y = 0; y <= initial_window_h - block_h; ++y)
+          features.push_back(mblbp_feature(x, y, block_w, block_h));
+  return features;
+}
+
 static data_t load_data(const std::string &positive_path,
                         const std::string &negative_path)
 {
@@ -39,6 +58,8 @@ static std::tuple<double, double, double, double> evaluate(
   const mblbp_classifier &classifier, const data_t &validation_set)
 {
   int size = validation_set.size();
+  if(size == 0)
+    return std::make_tuple(0.0, 0.0, 0.0, 0.0);
   // tp: true positive, fn: false negative, etc.
   int n_tp = 0, n_tn = 0, n_fp = 0, n_fn = 0;
 
@@ -81,26 +102,6 @@ static std::tuple<double, double, double, double> evaluate(
   return rates;
 }
 
-
-/* Generate all MB-LBP features inside a window
-** The size of the window is defined in "parameters.hh"
-**
-** Return
-** ------
-** features : std::vector<mblbp_feature>
-**     All features contained in a window
-*/
-static std::vector<mblbp_feature> mblbp_all_features()
-{
-  std::vector<mblbp_feature> features;
-  for(int block_w = min_block_size; block_w <= max_block_size; block_w += 3)
-    for(int block_h = min_block_size; block_h <= max_block_size; block_h += 3)
-      for(int x = 0; x <= initial_window_w - block_w; ++x)
-        for(int y = 0; y <= initial_window_h - block_h; ++y)
-          features.push_back(mblbp_feature(x, y, block_w, block_h));
-  return features;
-}
-
 mblbp_classifier train(const std::string &positive_path,
                        const std::string &negative_path)
 {
@@ -117,23 +118,45 @@ mblbp_classifier train(const std::string &positive_path,
 
   // retrieve all features for the configured initial window size
   auto all_features = mblbp_all_features();
+  std::vector<weak_classifier> all_weak_classifiers;
+  for(const auto& feature : all_features)
+    all_weak_classifiers.push_back(weak_classifier(feature));
   int n_features = all_features.size();
 
   // weights initialization to 1 / N
   std::vector<double> weights(training_set.size());
   std::fill_n(weights.begin(), training_set.size(), 1.0 / training_set.size());
 
-  double tp_rate, ng_rate, fp_rate, fn_rate;
-  double detection_rate;
+  double detection_rate, tp_rate, ng_rate, fp_rate, fn_rate;
   do
   {
+    strong_classifier new_strong_classifier;
+
+    for(int i = 0; i < train_n_weak_per_strong; ++i)
+    {
+      // update all weak classifiers regression parameters
+      // TODO
+      // calculate weighted square error for each weak_classifier
+      // TODO
+      // select best weak_classifier
+      // TODO
+      weak_classifier best_weak_classifier = all_weak_classifiers[best_idx];
+      // delete selected weak_classifier from the whole set
+      all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
+      // add new weak_classifier to the strong_classifier
+      new_strong_classifier.weak_classifiers.push_back(best_weak_classifier);
+    }
+
+    // add new strong_classifier to the mblbp_classifier
+    classifier.strong_classifiers.push_back(new_strong_classifier);
+
+    // calculate new detection and miss rates
     std::tie(tp_rate, ng_rate, fp_rate, fn_rate) = evaluate(classifier,
                                                             validation_set);
     detection_rate = tp_rate + ng_rate;
 
-    std::cout << "detection rate: " << detection_rate << std::endl;
-
-  } while(detection_rate < target_detection_rate || fp_rate > target_fp_rate);
+  } while(classifier.strong_classifiers.size() < train_n_strong &&
+          (detection_rate < target_detection_rate || fp_rate > target_fp_rate));
 
   return classifier;
 }
