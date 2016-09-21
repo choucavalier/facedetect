@@ -1,5 +1,6 @@
 #include <random>
 #include <utility>
+#include <algorithm>
 #include <tuple>
 #include <experimental/filesystem>
 
@@ -7,6 +8,8 @@
 
 #include "train.hh"
 #include "window.hh"
+#include "mblbp.hh"
+#include "params.hh"
 
 namespace fs = std::experimental::filesystem;
 using data_t = std::vector<std::pair<std::string, bool>>;
@@ -36,12 +39,13 @@ static std::tuple<double, double, double, double> evaluate(
   const mblbp_classifier &classifier, const data_t &validation_set)
 {
   int size = validation_set.size();
-  int n_tp, n_tn, n_fp, n_fn; // tp: true positive, fn: false negative, etc.
+  // tp: true positive, fn: false negative, etc.
+  int n_tp = 0, n_tn = 0, n_fp = 0, n_fn = 0;
 
   for(int i = 0; i < size; ++i)
   {
     std::string path = validation_set[i].first;
-    std::string real_label = validation_set[i].second;
+    bool real_label = validation_set[i].second;
 
     cv::Mat img = cv::imread(path, CV_LOAD_IMAGE_GRAYSCALE);
     int img_w = img.rows;
@@ -72,8 +76,29 @@ static std::tuple<double, double, double, double> evaluate(
   double fp_rate = (double)n_fp / size; // false positive rate
   double fn_rate = (double)n_fn / size; // false negative rate
 
-  return std::make_tuple<double, double, double, double>(tp_rate, tn_rate,
-                                                         fp_rate, fn_rate);
+  auto rates = std::make_tuple(tp_rate, tn_rate, fp_rate, fn_rate);
+
+  return rates;
+}
+
+
+/* Generate all MB-LBP features inside a window
+** The size of the window is defined in "parameters.hh"
+**
+** Return
+** ------
+** features : std::vector<mblbp_feature>
+**     All features contained in a window
+*/
+static std::vector<mblbp_feature> mblbp_all_features()
+{
+  std::vector<mblbp_feature> features;
+  for(int block_w = min_block_size; block_w <= max_block_size; block_w += 3)
+    for(int block_h = min_block_size; block_h <= max_block_size; block_h += 3)
+      for(int x = 0; x <= initial_window_w - block_w; ++x)
+        for(int y = 0; y <= initial_window_h - block_h; ++y)
+          features.push_back(mblbp_feature(x, y, block_w, block_h));
+  return features;
 }
 
 mblbp_classifier train(const std::string &positive_path,
@@ -90,12 +115,23 @@ mblbp_classifier train(const std::string &positive_path,
   data_t training_set;
   data_t validation_set;
 
+  // retrieve all features for the configured initial window size
+  auto all_features = mblbp_all_features();
+  int n_features = all_features.size();
+
+  // weights initialization to 1 / N
+  std::vector<double> weights(training_set.size());
+  std::fill_n(weights.begin(), training_set.size(), 1.0 / training_set.size());
+
+  double tp_rate, ng_rate, fp_rate, fn_rate;
+  double detection_rate;
   do
   {
-    double tp_rate, ng_rate, fp_rate, fn_rate;
     std::tie(tp_rate, ng_rate, fp_rate, fn_rate) = evaluate(classifier,
                                                             validation_set);
-    double detection_rate = tp_rate + ng_rate;
+    detection_rate = tp_rate + ng_rate;
+
+    std::cout << "detection rate: " << detection_rate << std::endl;
 
   } while(detection_rate < target_detection_rate || fp_rate > target_fp_rate);
 

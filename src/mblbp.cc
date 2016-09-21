@@ -57,17 +57,6 @@ unsigned char mblbp_calculate_feature(const cv::Mat &integral,
   return lbp_code;
 }
 
-std::vector<mblbp_feature> mblbp_all_features()
-{
-  std::vector<mblbp_feature> features;
-  for(int block_w = min_block_size; block_w <= max_block_size; block_w += 3)
-    for(int block_h = min_block_size; block_h <= max_block_size; block_h += 3)
-      for(int x = 0; x <= initial_window_w - block_w; ++x)
-        for(int y = 0; y <= initial_window_h - block_h; ++y)
-          features.push_back(mblbp_feature(x, y, block_w, block_h));
-  return features;
-}
-
 bool mblbp_feature::operator==(const mblbp_feature &other)
 {
   return this->x == other.x &&

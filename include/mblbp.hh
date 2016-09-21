@@ -41,18 +41,3 @@ using mblbp_features = std::vector<mblbp_feature>;
 unsigned char mblbp_calculate_feature(const cv::Mat &integral,
                                       const window &potential_window,
                                       const mblbp_feature &feature);
-
-/* Generate all MB-LBP features inside a window
-** The size of the window is defined in "parameters.hh"
-**
-** This function is mainly used for calculating all the MB-LBP features when
-** training the classifier. The classifier is the result of a selection of the
-** best MB-LBP features. To select the best MB-LBP features, they need to all be
-** calculated, and that is the purpose of this function.
-**
-** Return
-** ------
-** features : std::vector<mblbp_feature>
-**     All features contained in a window
-*/
-std::vector<mblbp_feature> mblbp_all_features();

@@ -28,6 +28,6 @@ int main(int argc, char **argv)
   int elapsed = duration.count();
   std::cout << "learning time: " << elapsed << "s" << std::endl;
 
-  save_classifier(classifier, output_path);
-  std::cout << "classifier saved in " << output_path << std::endl;
+  //save_classifier(classifier, output_path);
+  //std::cout << "classifier saved in " << output_path << std::endl;
 }
