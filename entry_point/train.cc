@@ -4,6 +4,8 @@
 #include "classifier.hh"
 #include "train.hh"
 
+using steady_clock = std::chrono::steady_clock;
+
 int main(int argc, char **argv)
 {
   if(argc < 4)
@@ -13,11 +15,9 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  std::string positive_path(argv[1]);
-  std::string negative_path(argv[2]);
-  std::string output_path(argv[3]);
-
-  using steady_clock = std::chrono::steady_clock;
+  std::string positive_path(argv[1]); // path to positive samples
+  std::string negative_path(argv[2]); // path to negative samples
+  std::string output_path(argv[3]); // where to output the classifier
 
   steady_clock::time_point begin = steady_clock::now();
 
@@ -28,7 +28,6 @@ int main(int argc, char **argv)
   int elapsed = duration.count();
   std::cout << "learning time: " << elapsed << "s" << std::endl;
 
-  std::cout << "saving classifier in " << output_path << std::endl;
-
   save_classifier(classifier, output_path);
+  std::cout << "classifier saved in " << output_path << std::endl;
 }

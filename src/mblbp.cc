@@ -18,9 +18,10 @@ static double avg_block_value(const cv::Mat &integral,
   uchar b = integral.at<uchar>(x2, y1);
   uchar c = integral.at<uchar>(x1, y2);
   uchar d = integral.at<uchar>(x2, y2);
-  int sum = d - b - c + a;
+  int block_sum = d - b - c + a;
+  int nb_of_pixels = (y2 - y1) * (x2 - x1);
 
-  return (double)sum * (y2 - y1) / (x2 - x1);
+  return (double)block_sum / (double)nb_of_pixels;
 }
 
 unsigned char mblbp_calculate_feature(const cv::Mat &integral,
