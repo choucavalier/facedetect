@@ -41,3 +41,4 @@ using mblbp_features = std::vector<mblbp_feature>;
 unsigned char mblbp_calculate_feature(const cv::Mat &integral,
                                       const window &potential_window,
                                       const mblbp_feature &feature);
+

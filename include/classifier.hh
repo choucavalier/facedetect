@@ -10,7 +10,8 @@
 
 struct weak_classifier
 {
-  weak_classifier(const mblbp_feature &feature) : feature(feature) {}
+  weak_classifier(const mblbp_feature &feature, const int k = 0) :
+    feature(feature), k(k) {}
 
   /* Calculate the weak_classifier value on a potential_window
   **
@@ -32,6 +33,7 @@ struct weak_classifier
 
   mblbp_feature feature;
   double regression_parameters[255];
+  int k;
 };
 
 struct strong_classifier

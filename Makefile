@@ -8,7 +8,8 @@ all:
 	@make --no-print-directory run
 
 run:
-	./build/detect gfx/test.jpg classifiers/dumb.txt
+	./build/train data/positive data/negative /tmp/classifier.txt
+	#./build/detect gfx/test.jpg classifiers/dumb.txt
 
 .PHONY: test
 test:

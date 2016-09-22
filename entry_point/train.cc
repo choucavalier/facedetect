@@ -4,7 +4,7 @@
 #include "classifier.hh"
 #include "train.hh"
 
-using steady_clock = std::chrono::steady_clock;
+namespace chrono = std::chrono;
 
 int main(int argc, char **argv)
 {
@@ -17,14 +17,15 @@ int main(int argc, char **argv)
 
   std::string positive_path(argv[1]); // path to positive samples
   std::string negative_path(argv[2]); // path to negative samples
-  std::string output_path(argv[3]); // where to output the classifier
+  std::string output_path(argv[3]); // where to output the trained classifier
 
-  steady_clock::time_point begin = steady_clock::now();
+  chrono::steady_clock::time_point begin = chrono::steady_clock::now();
 
   mblbp_classifier classifier = train(positive_path, negative_path);
 
-  steady_clock::time_point end = steady_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - begin);
+  chrono::steady_clock::time_point end = chrono::steady_clock::now();
+
+  auto duration = chrono::duration_cast<chrono::seconds>(end - begin);
   int elapsed = duration.count();
   std::cout << "learning time: " << elapsed << "s" << std::endl;
 

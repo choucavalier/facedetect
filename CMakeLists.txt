@@ -15,11 +15,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 include_directories(include)
 
 # detection
-add_executable(detect entry_point/detect.cc
-                      src/window.cc
-                      src/mblbp.cc
-                      src/classifier.cc
-                      src/detect.cc)
+#add_executable(detect entry_point/detect.cc
+                      #src/window.cc
+                      #src/mblbp.cc
+                      #src/classifier.cc
+                      #src/detect.cc)
 
 
 # training
@@ -30,11 +30,11 @@ add_executable(train entry_point/train.cc
                      src/window.cc)
 
 # tests
-add_executable(test_io test/test_io.cc
-                       src/mblbp.cc
-                       src/classifier.cc
-                       src/window.cc)
+#add_executable(test_io test/test_io.cc
+                       #src/mblbp.cc
+                       #src/classifier.cc
+                       #src/window.cc)
 
-target_link_libraries(detect ${OpenCV_LIBS})
+#target_link_libraries(detect ${OpenCV_LIBS})
 target_link_libraries(train ${OpenCV_LIBS})
 target_link_libraries(train stdc++fs)

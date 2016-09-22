@@ -12,7 +12,7 @@
 #include "params.hh"
 
 namespace fs = std::experimental::filesystem;
-using data_t = std::vector<std::pair<std::string, bool>>;
+using data_t = std::vector<std::pair<std::vector<unsigned char>, char>>;
 
 /* Generate all MB-LBP features inside a window
 ** The size of the window is defined in "parameters.hh"
@@ -33,16 +33,45 @@ static std::vector<mblbp_feature> mblbp_all_features()
   return features;
 }
 
-static data_t load_data(const std::string &positive_path,
+static std::vector<unsigned char> mblbp_calculate_all_features(
+  const cv::Mat &integral, const std::vector<mblbp_feature> &all_features)
+{
+  int n_features = all_features.size();
+  std::vector<unsigned char> calculated_features(n_features);
+  window base_window(0, 0, integral.rows, integral.cols, 1.0);
+  for(int i = 0; i < n_features; ++i)
+    calculated_features[i] = mblbp_calculate_feature(integral, base_window,
+                                                     all_features[i]);
+
+  return calculated_features;
+}
+
+static data_t load_data(const std::vector<mblbp_feature> &all_features,
+                        const std::string &positive_path,
                         const std::string &negative_path)
 {
-  std::vector<std::pair<std::string, bool>> data;
+  data_t data;
+  cv::Mat img, integral;
 
   for(auto& directory_entry : fs::directory_iterator(positive_path))
-    data.push_back(std::make_pair(directory_entry.path(), true));
+  {
+    std::string path = directory_entry.path();
+    img = cv::imread(path, CV_LOAD_IMAGE_GRAYSCALE);
+    cv::integral(img, integral);
+    std::vector<unsigned char> features = mblbp_calculate_all_features(
+      integral, all_features);
+    data.push_back(std::make_pair(features, 1));
+  }
 
   for(auto& directory_entry : fs::directory_iterator(negative_path))
-    data.push_back(std::make_pair(directory_entry.path(), false));
+  {
+    std::string path = directory_entry.path();
+    img = cv::imread(path, CV_LOAD_IMAGE_GRAYSCALE);
+    cv::integral(img, integral);
+    std::vector<unsigned char> features = mblbp_calculate_all_features(
+      integral, all_features);
+    data.push_back(std::make_pair(features, -1));
+  }
 
   return data;
 }
@@ -57,45 +86,53 @@ static void shuffle_data(data_t &data)
 static std::tuple<double, double, double, double> evaluate(
   const mblbp_classifier &classifier, const data_t &validation_set)
 {
-  int size = validation_set.size();
-  if(size == 0)
+  int n_samples = validation_set.size();
+  if(n_samples == 0)
     return std::make_tuple(0.0, 0.0, 0.0, 0.0);
   // tp: true positive, fn: false negative, etc.
   int n_tp = 0, n_tn = 0, n_fp = 0, n_fn = 0;
+  char real_label, classification_label;
 
-  for(int i = 0; i < size; ++i)
+  for(int i = 0; i < n_samples; ++i)
   {
-    std::string path = validation_set[i].first;
-    bool real_label = validation_set[i].second;
-
-    cv::Mat img = cv::imread(path, CV_LOAD_IMAGE_GRAYSCALE);
-    int img_w = img.rows;
-    int img_h = img.cols;
-    cv::Mat integral;
-    cv::integral(img, integral);
-    window img_window(0, 0, img_w, img_h, 1.0);
-    bool classification_label = classifier.classify(integral, img_window);
-
-    if(real_label == true)
+    real_label = validation_set[i].second;
+    // calculate classification_label
+    classification_label = 1;
+    for(const auto& sc : classifier.strong_classifiers)
     {
-      if(classification_label == true)
+      double sum = 0;
+      for(const auto& wc : sc.weak_classifiers)
+      {
+        unsigned char feature_value = validation_set[i].first[wc.k];
+        sum += wc.regression_parameters[feature_value];
+      }
+      if(sum < 0)
+      {
+        classification_label = -1;
+        break;
+      }
+    }
+
+    if(real_label == 1)
+    {
+      if(classification_label == 1)
         n_tp++;
       else
         n_fn++;
     }
     else
     {
-      if(classification_label == false)
+      if(classification_label == -1)
         n_tn++;
       else
         n_fn++;
     }
   }
 
-  double tp_rate = (double)n_tp / size; // true positive rate
-  double tn_rate = (double)n_tn / size; // true negative rate
-  double fp_rate = (double)n_fp / size; // false positive rate
-  double fn_rate = (double)n_fn / size; // false negative rate
+  double tp_rate = (double)n_tp / n_samples; // true positive rate
+  double tn_rate = (double)n_tn / n_samples; // true negative rate
+  double fp_rate = (double)n_fp / n_samples; // false positive rate
+  double fn_rate = (double)n_fn / n_samples; // false negative rate
 
   auto rates = std::make_tuple(tp_rate, tn_rate, fp_rate, fn_rate);
 
@@ -105,23 +142,37 @@ static std::tuple<double, double, double, double> evaluate(
 mblbp_classifier train(const std::string &positive_path,
                        const std::string &negative_path)
 {
+  std::cout << std::string(10, '-') << std::endl;
+  std::cout << "start training" << std::endl;
+  std::cout << std::string(10, '-') << std::endl;
+  std::cout << "using " << initial_window_w << "x" << initial_window_h
+            << " windows" << std::endl;
+
   mblbp_classifier classifier;
-
-  auto data = load_data(positive_path, negative_path);
-  shuffle_data(data);
-
-  for(const auto& data_point : data)
-    std::cout << data_point.first << " " << data_point.second << std::endl;
-
-  data_t training_set;
-  data_t validation_set;
 
   // retrieve all features for the configured initial window size
   auto all_features = mblbp_all_features();
-  std::vector<weak_classifier> all_weak_classifiers;
-  for(const auto& feature : all_features)
-    all_weak_classifiers.push_back(weak_classifier(feature));
   int n_features = all_features.size();
+  std::cout << n_features << " features / image ("
+            << sizeof(unsigned char) * n_features << " bytes)"
+            << std::endl;
+  // construct one weak_classifier per feature
+  std::vector<weak_classifier> all_weak_classifiers;
+  for(int k = 0; k < n_features; ++k)
+    all_weak_classifiers.push_back(weak_classifier(all_features[k], k));
+
+  data_t data = load_data(all_features, positive_path, negative_path);
+  shuffle_data(data);
+
+  std::cout << data.size() << " samples in dataset" << std::endl;
+
+  std::size_t split_idx = 2 * data.size() / 3;
+  data_t training_set(data.begin(), data.begin() + split_idx);
+  data_t validation_set(data.begin() + split_idx, data.end());
+
+  std::cout << training_set.size() << " samples in training set" << std::endl;
+  std::cout << validation_set.size() << " samples in validation set"
+            << std::endl;
 
   // weights initialization to 1 / N
   std::vector<double> weights(training_set.size());
@@ -135,16 +186,15 @@ mblbp_classifier train(const std::string &positive_path,
     for(int i = 0; i < train_n_weak_per_strong; ++i)
     {
       // update all weak classifiers regression parameters
-      // TODO
       // calculate weighted square error for each weak_classifier
       // TODO
       // select best weak_classifier
-      // TODO
-      weak_classifier best_weak_classifier = all_weak_classifiers[best_idx];
+      // TODO int best_idx = ???
+      //weak_classifier best_weak_classifier = all_weak_classifiers[best_idx];
       // delete selected weak_classifier from the whole set
-      all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
+      //all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
       // add new weak_classifier to the strong_classifier
-      new_strong_classifier.weak_classifiers.push_back(best_weak_classifier);
+      //new_strong_classifier.weak_classifiers.push_back(best_weak_classifier);
     }
 
     // add new strong_classifier to the mblbp_classifier
