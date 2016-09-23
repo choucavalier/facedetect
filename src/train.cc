@@ -185,9 +185,14 @@ mblbp_classifier train(const std::string &positive_path,
 
     for(int n_weak = 0; n_weak < train_n_weak_per_strong; ++n_weak)
     {
+      int best_idx = -1;
+      double best_wse;
       // update all weak classifiers regression parameters
-      for(auto& wc : all_weak_classifiers)
+      // calculate weighted square error for each weak_classifier
+      for(std::size_t wc_idx = 0 ; wc_idx < all_weak_classifiers.size();
+          wc_idx++)
       {
+        weak_classifier &wc = all_weak_classifiers[wc_idx];
         for(int j = 0; j < 255; ++j)
         {
           double numerator = 0, denominator = 0;
@@ -201,16 +206,19 @@ mblbp_classifier train(const std::string &positive_path,
           }
           wc.regression_parameters[j] = numerator / denominator;
         }
+        double wse = 0;
+        for(std::size_t i = 0; i < training_set.size(); ++i)
+          wse += weights[i] * (training_set[i].second
+                               - training_set[i].first[wc.k]);
+        if(best_idx < 0 || wse < best_wse)
+          best_idx = wc_idx;
       }
-      // calculate weighted square error for each weak_classifier
-      // TODO
-      // select best weak_classifier
-      // TODO int best_idx = ???
-      //weak_classifier best_weak_classifier = all_weak_classifiers[best_idx];
+      // get a copy of the best weak_classifier before deleting it
+      weak_classifier best_weak_classifier(all_weak_classifiers[best_idx]);
       // delete selected weak_classifier from the whole set
-      //all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
+      all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
       // add new weak_classifier to the strong_classifier
-      //new_strong_classifier.weak_classifiers.push_back(best_weak_classifier);
+      new_strong_classifier.weak_classifiers.push_back(best_weak_classifier);
     }
 
     // add new strong_classifier to the mblbp_classifier
