@@ -211,7 +211,10 @@ mblbp_classifier train(const std::string &positive_path,
           wse += weights[i] * (training_set[i].second
                                - training_set[i].first[wc.k]);
         if(best_idx < 0 || wse < best_wse)
+        {
+          best_wse = wse;
           best_idx = wc_idx;
+        }
       }
       // get a copy of the best weak_classifier before deleting it
       weak_classifier best_weak_classifier(all_weak_classifiers[best_idx]);
