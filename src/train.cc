@@ -183,9 +183,25 @@ mblbp_classifier train(const std::string &positive_path,
   {
     strong_classifier new_strong_classifier;
 
-    for(int i = 0; i < train_n_weak_per_strong; ++i)
+    for(int n_weak = 0; n_weak < train_n_weak_per_strong; ++n_weak)
     {
       // update all weak classifiers regression parameters
+      for(auto& wc : all_weak_classifiers)
+      {
+        for(int j = 0; j < 255; ++j)
+        {
+          double numerator = 0, denominator = 0;
+          for(std::size_t i = 0; i < training_set.size(); ++i)
+          {
+            if(training_set[i].first[wc.k] == j)
+            {
+              numerator += weights[i] * training_set[i].second;
+              denominator += weights[i];
+            }
+          }
+          wc.regression_parameters[j] = numerator / denominator;
+        }
+      }
       // calculate weighted square error for each weak_classifier
       // TODO
       // select best weak_classifier

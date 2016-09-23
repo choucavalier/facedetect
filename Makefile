@@ -5,7 +5,7 @@ all:
 	@echo ""
 	@echo "---------- compilation done ----------"
 	@echo ""
-	@make --no-print-directory run
+	@make --no-print-directory -j4 run
 
 run:
 	./build/train data/positive data/negative /tmp/classifier.txt

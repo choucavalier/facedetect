@@ -21,7 +21,6 @@ include_directories(include)
                       #src/classifier.cc
                       #src/detect.cc)
 
-
 # training
 add_executable(train entry_point/train.cc
                      src/train.cc
