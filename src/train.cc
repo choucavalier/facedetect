@@ -13,6 +13,7 @@
 #include "params.hh"
 
 namespace fs = std::experimental::filesystem;
+namespace chrono = std::chrono;
 using data_t = std::vector<std::pair<std::vector<unsigned char>, char>>;
 
 /* Estimate the memory used by a data set
@@ -71,28 +72,55 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
                         const std::string &positive_path,
                         const std::string &negative_path)
 {
+  chrono::steady_clock::time_point begin = chrono::steady_clock::now();
+
   data_t data;
-  cv::Mat img, integral;
+
+  std::vector<std::string> positive_paths;
+  std::vector<std::string> negative_paths;
 
   for(auto& directory_entry : fs::directory_iterator(positive_path))
+    positive_paths.push_back(directory_entry.path().string());
+
+  std::cout << positive_paths.size() << " positive samples" << std::endl;
+
+  #pragma omp parallel for
+  for(std::size_t i = 0; i < positive_paths.size(); ++i)
   {
-    std::string path = directory_entry.path();
-    img = cv::imread(path, CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat img, integral;
+    img = cv::imread(positive_paths[i], CV_LOAD_IMAGE_GRAYSCALE);
     cv::integral(img, integral);
     std::vector<unsigned char> features = mblbp_calculate_all_features(
       integral, all_features);
-    data.push_back(std::make_pair(features, 1));
+    #pragma omp critical(add_features_positive)
+    {
+      data.push_back(std::make_pair(features, 1));
+    }
   }
 
   for(auto& directory_entry : fs::directory_iterator(negative_path))
+    negative_paths.push_back(directory_entry.path().string());
+
+  std::cout << negative_paths.size() << " negative samples" << std::endl;
+
+  #pragma omp parallel for
+  for(std::size_t i = 0; i < negative_paths.size(); ++i)
   {
-    std::string path = directory_entry.path();
-    img = cv::imread(path, CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat img, integral;
+    img = cv::imread(negative_paths[i], CV_LOAD_IMAGE_GRAYSCALE);
     cv::integral(img, integral);
     std::vector<unsigned char> features = mblbp_calculate_all_features(
       integral, all_features);
-    data.push_back(std::make_pair(features, -1));
+    #pragma omp critical(add_features_negative)
+    {
+      data.push_back(std::make_pair(features, -1));
+    }
   }
+
+  chrono::steady_clock::time_point end = chrono::steady_clock::now();
+  auto duration = chrono::duration_cast<chrono::seconds>(end - begin);
+  int elapsed = duration.count();
+  std::cout << "loading data took " << elapsed << "s" << std::endl;
 
   return data;
 }
