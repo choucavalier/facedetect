@@ -20,6 +20,7 @@ include_directories(include)
                       #src/mblbp.cc
                       #src/classifier.cc
                       #src/detect.cc)
+#target_link_libraries(detect ${OpenCV_LIBS})
 
 # training
 add_executable(train entry_point/train.cc
@@ -27,13 +28,22 @@ add_executable(train entry_point/train.cc
                      src/classifier.cc
                      src/mblbp.cc
                      src/window.cc)
+target_link_libraries(train ${OpenCV_LIBS})
+target_link_libraries(train stdc++fs)
+
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
+# dataset preprocessing
+#add_executable(preprocess entry_point/preprocess.cc)
+#target_link_libraries(preprocess ${OpenCV_LIBS})
+#target_link_libraries(preprocess stdc++fs)
 
 # tests
 #add_executable(test_io test/test_io.cc
                        #src/mblbp.cc
                        #src/classifier.cc
                        #src/window.cc)
-
-#target_link_libraries(detect ${OpenCV_LIBS})
-target_link_libraries(train ${OpenCV_LIBS})
-target_link_libraries(train stdc++fs)

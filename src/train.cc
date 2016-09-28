@@ -2,6 +2,7 @@
 #include <utility>
 #include <algorithm>
 #include <tuple>
+#include <cmath>
 #include <experimental/filesystem>
 
 #include <opencv2/opencv.hpp>
@@ -13,6 +14,26 @@
 
 namespace fs = std::experimental::filesystem;
 using data_t = std::vector<std::pair<std::vector<unsigned char>, char>>;
+
+/* Estimate the memory used by a data set
+**
+** Paramaters
+** ----------
+** data : data_t
+**     Dataset where each sample is represented as a vector of features
+**
+** Return
+** ------
+** size_in_bytes : long
+**     Estimated size of the dataset in bytes
+*/
+long estimate_memory_size(data_t data)
+{
+  int n_samples = data.size();
+  int n_features = data[0].first.size();
+
+  return n_samples * n_features * sizeof(unsigned char);
+}
 
 /* Generate all MB-LBP features inside a window
 ** The size of the window is defined in "parameters.hh"
@@ -161,11 +182,16 @@ mblbp_classifier train(const std::string &positive_path,
   for(int k = 0; k < n_features; ++k)
     all_weak_classifiers.push_back(weak_classifier(all_features[k], k));
 
+  std::cout << std::string(10, '-') << std::endl;
+  std::cout << "calculating all MB-LBP features on all samples" << std::endl;
   data_t data = load_data(all_features, positive_path, negative_path);
+  std::cout << "shuffling data" << std::endl;
   shuffle_data(data);
 
   std::cout << data.size() << " samples in dataset" << std::endl;
+  std::cout << estimate_memory_size(data) << " bytes in memory" << std::endl;
 
+  // split dataset
   std::size_t split_idx = 2 * data.size() / 3;
   data_t training_set(data.begin(), data.begin() + split_idx);
   data_t validation_set(data.begin() + split_idx, data.end());
@@ -173,22 +199,30 @@ mblbp_classifier train(const std::string &positive_path,
   std::cout << training_set.size() << " samples in training set" << std::endl;
   std::cout << validation_set.size() << " samples in validation set"
             << std::endl;
+  std::cout << std::string(10, '-') << std::endl;
 
-  // weights initialization to 1 / N
+  // weights initialization to 1 / n_samples
   std::vector<double> weights(training_set.size());
   std::fill_n(weights.begin(), training_set.size(), 1.0 / training_set.size());
 
+  // current rates on validation set
   double detection_rate, tp_rate, ng_rate, fp_rate, fn_rate;
+
+  int n_iter = 1;
+
   do
   {
+    std::cout << "iteration #" << n_iter << std::endl;
+
     strong_classifier new_strong_classifier;
 
+    // select train_n_weak_per_strong weak classifiers
     for(int n_weak = 0; n_weak < train_n_weak_per_strong; ++n_weak)
     {
-      int best_idx = -1;
-      double best_wse;
+      int best_idx = -1; // index of the best weak_classifier (smallest wse)
+      double best_wse; // current smallest (best) wse, used to update best_idx
       // update all weak classifiers regression parameters
-      // calculate weighted square error for each weak_classifier
+      #pragma omp parallel for
       for(std::size_t wc_idx = 0 ; wc_idx < all_weak_classifiers.size();
           wc_idx++)
       {
@@ -208,14 +242,18 @@ mblbp_classifier train(const std::string &positive_path,
         }
         double wse = 0;
         for(std::size_t i = 0; i < training_set.size(); ++i)
-          wse += weights[i] * (training_set[i].second
-                               - training_set[i].first[wc.k]);
-        if(best_idx < 0 || wse < best_wse)
+          wse += weights[i] *
+            std::pow(training_set[i].second - training_set[i].first[wc.k], 2);
+        #pragma omp critical(best_wse_update)
         {
-          best_wse = wse;
-          best_idx = wc_idx;
+          if(best_idx < 0 || wse < best_wse)
+          {
+            best_wse = wse;
+            best_idx = wc_idx;
+          }
         }
       }
+      std::cout << "best wse " << best_wse << std::endl;
       // get a copy of the best weak_classifier before deleting it
       weak_classifier best_weak_classifier(all_weak_classifiers[best_idx]);
       // delete selected weak_classifier from the whole set
@@ -231,6 +269,11 @@ mblbp_classifier train(const std::string &positive_path,
     std::tie(tp_rate, ng_rate, fp_rate, fn_rate) = evaluate(classifier,
                                                             validation_set);
     detection_rate = tp_rate + ng_rate;
+
+    std::cout << "detection_rate = " << detection_rate << std::endl;
+    std::cout << "false positive rate = " << fp_rate << std::endl;
+
+    n_iter++;
 
   } while(classifier.strong_classifiers.size() < train_n_strong &&
           (detection_rate < target_detection_rate || fp_rate > target_fp_rate));
