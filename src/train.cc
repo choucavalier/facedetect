@@ -85,7 +85,7 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
   std::cout << positive_paths.size() << " positive samples" << std::endl;
 
   #pragma omp parallel for
-  for(std::size_t i = 0; i < positive_paths.size(); ++i)
+  for(std::size_t i = 0; i < 200; ++i)
   {
     cv::Mat img, integral;
     img = cv::imread(positive_paths[i], CV_LOAD_IMAGE_GRAYSCALE);
@@ -104,7 +104,7 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
   std::cout << negative_paths.size() << " negative samples" << std::endl;
 
   #pragma omp parallel for
-  for(std::size_t i = 0; i < negative_paths.size(); ++i)
+  for(std::size_t i = 0; i < 1000; ++i)
   {
     cv::Mat img, integral;
     img = cv::imread(negative_paths[i], CV_LOAD_IMAGE_GRAYSCALE);
@@ -234,7 +234,7 @@ mblbp_classifier train(const std::string &positive_path,
   std::fill_n(weights.begin(), training_set.size(), 1.0 / training_set.size());
 
   // current rates on validation set
-  double detection_rate, tp_rate, ng_rate, fp_rate, fn_rate;
+  double detection_rate, tp_rate, tn_rate, fp_rate, fn_rate;
 
   int n_iter = 1;
 
@@ -285,7 +285,7 @@ mblbp_classifier train(const std::string &positive_path,
       // get a copy of the best weak_classifier before deleting it
       weak_classifier best_weak_classifier(all_weak_classifiers[best_idx]);
       // delete selected weak_classifier from the whole set
-      all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
+      //all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
       // add new weak_classifier to the strong_classifier
       new_strong_classifier.weak_classifiers.push_back(best_weak_classifier);
     }
@@ -294,12 +294,15 @@ mblbp_classifier train(const std::string &positive_path,
     classifier.strong_classifiers.push_back(new_strong_classifier);
 
     // calculate new detection and miss rates
-    std::tie(tp_rate, ng_rate, fp_rate, fn_rate) = evaluate(classifier,
+    std::tie(tp_rate, tn_rate, fp_rate, fn_rate) = evaluate(classifier,
                                                             validation_set);
-    detection_rate = tp_rate + ng_rate;
+    detection_rate = tp_rate;
 
     std::cout << "detection_rate = " << detection_rate << std::endl;
-    std::cout << "false positive rate = " << fp_rate << std::endl;
+    std::cout << "true positive = " << tp_rate << std::endl;
+    std::cout << "true negative = " << tn_rate << std::endl;
+    std::cout << "false positive = " << fp_rate << std::endl;
+    std::cout << "false negative = " << fn_rate << std::endl;
 
     n_iter++;
 
