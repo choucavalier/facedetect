@@ -266,12 +266,17 @@ mblbp_classifier train(const std::string &positive_path,
               denominator += weights[i];
             }
           }
-          wc.regression_parameters[j] = numerator / denominator;
+          if(denominator != 0)
+            wc.regression_parameters[j] = numerator / denominator;
+          else
+            wc.regression_parameters[j] = 0;
         }
         double wse = 0;
         for(std::size_t i = 0; i < training_set.size(); ++i)
-          wse += weights[i] *
-            std::pow(training_set[i].second - training_set[i].first[wc.k], 2);
+        {
+          double value = wc.regression_parameters[training_set[i].first[wc.k]];
+          wse += weights[i] * std::pow(training_set[i].second - value, 2);
+        }
         #pragma omp critical(best_wse_update)
         {
           if(best_idx < 0 || wse < best_wse)
@@ -284,10 +289,36 @@ mblbp_classifier train(const std::string &positive_path,
       std::cout << "best wse " << best_wse << std::endl;
       // get a copy of the best weak_classifier before deleting it
       weak_classifier best_weak_classifier(all_weak_classifiers[best_idx]);
+
+      weak_classifier &bwc = best_weak_classifier;
+      std::cout << "new weak_classifier:" << std::endl;
+      std::cout << "    feature:" << std::endl;
+      std::cout << "        (x, y) = (" << bwc.feature.x << ", "
+                                        << bwc.feature.y << ")" << std::endl;
+
+      std::cout << "        block_w = " << bwc.feature.block_w << std::endl;
+      std::cout << "        block_h = " << bwc.feature.block_h << std::endl;
+      std::cout << "    k = " << bwc.k << std::endl;
+      std::cout << "    regression_parameters = [ ";
+      for(int i = 0; i < 255; ++i)
+        std::cout << bwc.regression_parameters[i] << " ";
+      std::cout << "]" << std::endl;
+
       // delete selected weak_classifier from the whole set
-      //all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
+      all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
       // add new weak_classifier to the strong_classifier
       new_strong_classifier.weak_classifiers.push_back(best_weak_classifier);
+
+      // update weights
+      double sum = 0;
+      for(std::size_t i = 0; i < weights.size(); ++i)
+      {
+        double value = bwc.regression_parameters[training_set[i].first[bwc.k]];
+        weights[i] = weights[i] * std::exp(-training_set[i].second * value);
+        sum += weights[i];
+      }
+      for(std::size_t i = 0; i < weights.size(); ++i)
+        weights[i] /= sum;
     }
 
     // add new strong_classifier to the mblbp_classifier
