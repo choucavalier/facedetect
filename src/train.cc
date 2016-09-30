@@ -85,7 +85,7 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
   std::cout << positive_paths.size() << " positive samples" << std::endl;
 
   #pragma omp parallel for
-  for(std::size_t i = 0; i < 200; ++i)
+  for(std::size_t i = 0; i < positve_paths.size(); ++i)
   {
     cv::Mat img, integral;
     img = cv::imread(positive_paths[i], CV_LOAD_IMAGE_GRAYSCALE);
@@ -104,7 +104,7 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
   std::cout << negative_paths.size() << " negative samples" << std::endl;
 
   #pragma omp parallel for
-  for(std::size_t i = 0; i < 1000; ++i)
+  for(std::size_t i = 0; i < negative_paths.size(); ++i)
   {
     cv::Mat img, integral;
     img = cv::imread(negative_paths[i], CV_LOAD_IMAGE_GRAYSCALE);
@@ -174,7 +174,7 @@ static std::tuple<double, double, double, double> evaluate(
       if(classification_label == -1)
         n_tn++;
       else
-        n_fn++;
+        n_fp++;
     }
   }
 
@@ -275,7 +275,7 @@ mblbp_classifier train(const std::string &positive_path,
         for(std::size_t i = 0; i < training_set.size(); ++i)
         {
           double value = wc.regression_parameters[training_set[i].first[wc.k]];
-          wse += weights[i] * std::pow(training_set[i].second - value, 2);
+          wse += weights[i] * std::pow(value - training_set[i].second, 2);
         }
         #pragma omp critical(best_wse_update)
         {
