@@ -85,7 +85,8 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
   std::cout << positive_paths.size() << " positive samples" << std::endl;
 
   #pragma omp parallel for
-  for(std::size_t i = 0; i < positve_paths.size(); ++i)
+  //for(std::size_t i = 0; i < positive_paths.size(); ++i)
+  for(std::size_t i = 0; i < 1000; ++i)
   {
     cv::Mat img, integral;
     img = cv::imread(positive_paths[i], CV_LOAD_IMAGE_GRAYSCALE);
@@ -104,7 +105,8 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
   std::cout << negative_paths.size() << " negative samples" << std::endl;
 
   #pragma omp parallel for
-  for(std::size_t i = 0; i < negative_paths.size(); ++i)
+  //for(std::size_t i = 0; i < negative_paths.size(); ++i)
+  for(std::size_t i = 0; i < 1000; ++i)
   {
     cv::Mat img, integral;
     img = cv::imread(negative_paths[i], CV_LOAD_IMAGE_GRAYSCALE);
@@ -142,9 +144,15 @@ static std::tuple<double, double, double, double> evaluate(
   int n_tp = 0, n_tn = 0, n_fp = 0, n_fn = 0;
   char real_label, classification_label;
 
+  int n_positive = 0, n_negative = 0;
+
   for(int i = 0; i < n_samples; ++i)
   {
     real_label = validation_set[i].second;
+    if(real_label == 1)
+      n_positive++;
+    else
+      n_negative++;
     // calculate classification_label
     classification_label = 1;
     for(const auto& sc : classifier.strong_classifiers)
@@ -178,10 +186,10 @@ static std::tuple<double, double, double, double> evaluate(
     }
   }
 
-  double tp_rate = (double)n_tp / n_samples; // true positive rate
-  double tn_rate = (double)n_tn / n_samples; // true negative rate
-  double fp_rate = (double)n_fp / n_samples; // false positive rate
-  double fn_rate = (double)n_fn / n_samples; // false negative rate
+  double tp_rate = (double)n_tp / n_positive; // true positive rate
+  double tn_rate = (double)n_tn / n_negative; // true negative rate
+  double fp_rate = (double)n_fp / n_positive; // false positive rate
+  double fn_rate = (double)n_fn / n_negative; // false negative rate
 
   auto rates = std::make_tuple(tp_rate, tn_rate, fp_rate, fn_rate);
 
