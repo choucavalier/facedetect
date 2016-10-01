@@ -277,7 +277,7 @@ mblbp_classifier train(const std::string &positive_path,
           if(denominator != 0)
             wc.regression_parameters[j] = numerator / denominator;
           else
-            wc.regression_parameters[j] = 0;
+            wc.regression_parameters[j] = 1;
         }
         double wse = 0;
         for(std::size_t i = 0; i < training_set.size(); ++i)
