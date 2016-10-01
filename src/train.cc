@@ -299,18 +299,18 @@ mblbp_classifier train(const std::string &positive_path,
       weak_classifier best_weak_classifier(all_weak_classifiers[best_idx]);
 
       weak_classifier &bwc = best_weak_classifier;
-      std::cout << "new weak_classifier:" << std::endl;
-      std::cout << "    feature:" << std::endl;
-      std::cout << "        (x, y) = (" << bwc.feature.x << ", "
-                                        << bwc.feature.y << ")" << std::endl;
+      //std::cout << "new weak_classifier:" << std::endl;
+      //std::cout << "    feature:" << std::endl;
+      //std::cout << "        (x, y) = (" << bwc.feature.x << ", "
+                                        //<< bwc.feature.y << ")" << std::endl;
 
-      std::cout << "        block_w = " << bwc.feature.block_w << std::endl;
-      std::cout << "        block_h = " << bwc.feature.block_h << std::endl;
-      std::cout << "    k = " << bwc.k << std::endl;
-      std::cout << "    regression_parameters = [ ";
-      for(int i = 0; i < 255; ++i)
-        std::cout << bwc.regression_parameters[i] << " ";
-      std::cout << "]" << std::endl;
+      //std::cout << "        block_w = " << bwc.feature.block_w << std::endl;
+      //std::cout << "        block_h = " << bwc.feature.block_h << std::endl;
+      //std::cout << "    k = " << bwc.k << std::endl;
+      //std::cout << "    regression_parameters = [ ";
+      //for(int i = 0; i < 255; ++i)
+        //std::cout << bwc.regression_parameters[i] << " ";
+      //std::cout << "]" << std::endl;
 
       // delete selected weak_classifier from the whole set
       all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
@@ -327,6 +327,15 @@ mblbp_classifier train(const std::string &positive_path,
       }
       for(std::size_t i = 0; i < weights.size(); ++i)
         weights[i] /= sum;
+
+      // calculate new detection and miss rates
+      std::tie(tp_rate, tn_rate, fp_rate, fn_rate) = evaluate(classifier,
+                                                              validation_set);
+      detection_rate = tp_rate;
+
+      std::cout << "detection_rate = " << detection_rate << std::endl;
+      std::cout << "best_wse = " << best_wse << std::endl;
+      std::cout << std::string(10, '-') << std::endl;
     }
 
     // add new strong_classifier to the mblbp_classifier
