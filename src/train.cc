@@ -334,6 +334,10 @@ mblbp_classifier train(const std::string &positive_path,
       detection_rate = tp_rate;
 
       std::cout << "detection_rate = " << detection_rate << std::endl;
+      std::cout << "true positive = " << tp_rate << std::endl;
+      std::cout << "true negative = " << tn_rate << std::endl;
+      std::cout << "false positive = " << fp_rate << std::endl;
+      std::cout << "false negative = " << fn_rate << std::endl;
       std::cout << "best_wse = " << best_wse << std::endl;
       std::cout << std::string(10, '-') << std::endl;
     }
