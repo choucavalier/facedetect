@@ -86,7 +86,7 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
 
   #pragma omp parallel for
   //for(std::size_t i = 0; i < positive_paths.size(); ++i)
-  for(std::size_t i = 0; i < 1000; ++i)
+  for(std::size_t i = 0; i < positive_paths.size(); ++i)
   {
     cv::Mat img, integral;
     img = cv::imread(positive_paths[i], CV_LOAD_IMAGE_GRAYSCALE);
@@ -106,7 +106,7 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
 
   #pragma omp parallel for
   //for(std::size_t i = 0; i < negative_paths.size(); ++i)
-  for(std::size_t i = 0; i < 1000; ++i)
+  for(std::size_t i = 0; i < positive_paths.size(); ++i)
   {
     cv::Mat img, integral;
     img = cv::imread(negative_paths[i], CV_LOAD_IMAGE_GRAYSCALE);
