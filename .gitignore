@@ -33,6 +33,7 @@ bib
 __pycache__
 .ycm_extra_conf.py
 data
+CMakeLists.txt
 
 # Log files
 log_train.txt

@@ -99,8 +99,14 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
     }
   }
 
+  std::size_t i = 0;
   for(auto& directory_entry : fs::directory_iterator(negative_path))
+  {
+    if ( i >= positive_paths.size() )
+      break;
     negative_paths.push_back(directory_entry.path().string());
+    ++i;
+  }
 
   std::cout << negative_paths.size() << " negative samples" << std::endl;
 
@@ -190,12 +196,44 @@ static std::tuple<double, double, double, double> evaluate(
 
   double tp_rate = (double)n_tp / n_positive; // true positive rate
   double tn_rate = (double)n_tn / n_negative; // true negative rate
-  double fp_rate = (double)n_fp / n_positive; // false positive rate
-  double fn_rate = (double)n_fn / n_negative; // false negative rate
+  double fp_rate = (double)n_fp / n_negative; // false positive rate
+  double fn_rate = (double)n_fn / n_positive; // false negative rate
 
   auto rates = std::make_tuple(tp_rate, tn_rate, fp_rate, fn_rate);
 
   return rates;
+}
+
+void remove_true_and_false_negatives(const mblbp_classifier &classifier,
+                                     data_t &training_set)
+{
+  char classification_label;
+
+  auto iter = training_set.begin();
+  while ( iter != training_set.end() )
+  {
+    classification_label = 1;
+    for(const auto& sc : classifier.strong_classifiers)
+    {
+      double sum = 0;
+      for(const auto& wc : sc.weak_classifiers)
+      {
+        int feature_value = iter->first[wc.k];
+        sum += wc.regression_parameters[feature_value];
+      }
+      if(sum < 0)
+      {
+        classification_label = -1;
+        break;
+      }
+    }
+
+    if ( classification_label == -1 )
+      iter = training_set.erase( iter );
+    else
+      ++iter;
+  }
+
 }
 
 mblbp_classifier train(const std::string &positive_path,
@@ -335,12 +373,15 @@ mblbp_classifier train(const std::string &positive_path,
                                                               validation_set);
       detection_rate = tp_rate;
 
+      remove_true_and_false_negatives(classifier, training_set);
+
       std::cout << "detection_rate = " << detection_rate << std::endl;
       std::cout << "true positive = " << tp_rate << std::endl;
       std::cout << "true negative = " << tn_rate << std::endl;
       std::cout << "false positive = " << fp_rate << std::endl;
       std::cout << "false negative = " << fn_rate << std::endl;
       std::cout << "best_wse = " << best_wse << std::endl;
+      std::cout << "training set size = " << training_set.size() << std::endl;
       std::cout << std::string(10, '-') << std::endl;
     }
 

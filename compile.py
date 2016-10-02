@@ -93,9 +93,6 @@ def main():
         build_options_file.write(opt + "\n")
     build_options_file.close()
 
-    os.chdir("..")
-    os.remove("CMakeLists.txt")
-
 
 def add_detection(output_str, build_options):
     output_str += "\n\n"
