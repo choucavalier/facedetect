@@ -174,9 +174,11 @@ static data_t select_data_cascade(const data_t& training_set,
     }
   }
 
-  std::cout << "positive training examples passed through classification : " << positive_training_examples.size();
+  std::cout << "positive training examples passed through classification : "
+            << positive_training_examples.size();
   std::cout << " / " << n_pos << std::endl;
-  std::cout << "negative training examples passed through classification : " << negative_training_examples.size();
+  std::cout << "negative training examples passed through classification : "
+            << negative_training_examples.size();
   std::cout << " / " << n_neg << std::endl;
 
   if (positive_training_examples.size() < negative_training_examples.size())
@@ -184,12 +186,16 @@ static data_t select_data_cascade(const data_t& training_set,
   if (negative_training_examples.size() < positive_training_examples.size())
     positive_training_examples.resize(negative_training_examples.size());
 
-  std::cout << "selected number of positive training examples : " << positive_training_examples.size() << std::endl;
-  std::cout << "selected number of negative training examples : " << negative_training_examples.size() << std::endl;
+  std::cout << "selected number of positive training examples : "
+            << positive_training_examples.size() << std::endl;
+  std::cout << "selected number of negative training examples : "
+            << negative_training_examples.size() << std::endl;
 
   data_t selected_data;
-  selected_data.insert(selected_data.end(), positive_training_examples.begin(), positive_training_examples.end());
-  selected_data.insert(selected_data.end(), negative_training_examples.begin(), negative_training_examples.end());
+  selected_data.insert(selected_data.end(), positive_training_examples.begin(),
+                       positive_training_examples.end());
+  selected_data.insert(selected_data.end(), negative_training_examples.begin(),
+                       negative_training_examples.end());
 
   return selected_data;
 }
@@ -228,8 +234,6 @@ static std::tuple<double, double, double, double> evaluate(
       for(const auto& wc : sc.weak_classifiers)
       {
         int feature_value = validation_set[i].first[wc.k];
-        //std::cout << "feature value " << feature_value << std::endl;
-        //std::cout << "reg param " << wc.regression_parameters[feature_value] << std::endl;
         sum += wc.regression_parameters[feature_value];
       }
       if(sum < 0)
@@ -294,7 +298,6 @@ void remove_true_and_false_negatives(const mblbp_classifier &classifier,
     else
       ++iter;
   }
-
 }
 
 mblbp_classifier train(const std::string &positive_path,
