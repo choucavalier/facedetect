@@ -334,7 +334,7 @@ mblbp_classifier train(const std::string &positive_path,
           }
         }
       }
-      std::cout << "best wse " << best_wse << std::endl;
+      std::cout << "best wse " << best_wse << "  " << n_weak << " / " << train_n_weak_per_strong << std::endl;
       // get a copy of the best weak_classifier before deleting it
       weak_classifier best_weak_classifier(all_weak_classifiers[best_idx]);
 
@@ -403,11 +403,12 @@ mblbp_classifier train(const std::string &positive_path,
     std::cout << "true negative = " << tn_rate << std::endl;
     std::cout << "false positive = " << fp_rate << std::endl;
     std::cout << "false negative = " << fn_rate << std::endl;
+    std::cout << "remaining training set size = " << training_set.size() << std::endl;
 
     n_iter++;
 
   } while(classifier.strong_classifiers.size() < train_n_strong &&
-          (detection_rate < target_detection_rate || fp_rate > target_fp_rate ));
+          (detection_rate < target_detection_rate || fp_rate > target_fp_rate ) && training_set.size() > 0 );
 
   return classifier;
 }
