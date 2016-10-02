@@ -85,7 +85,7 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
   std::cout << positive_paths.size() << " positive samples" << std::endl;
 
   #pragma omp parallel for
-  //for(std::size_t i = 0; i < positive_paths.size(); ++i)
+  //for(std::size_t i = 0; i < 100; ++i)
   for(std::size_t i = 0; i < positive_paths.size(); ++i)
   {
     cv::Mat img, integral;
@@ -105,7 +105,7 @@ static data_t load_data(const std::vector<mblbp_feature> &all_features,
   std::cout << negative_paths.size() << " negative samples" << std::endl;
 
   #pragma omp parallel for
-  //for(std::size_t i = 0; i < negative_paths.size(); ++i)
+  //for(std::size_t i = 0; i < 100; ++i)
   for(std::size_t i = 0; i < positive_paths.size(); ++i)
   {
     cv::Mat img, integral;
@@ -160,7 +160,9 @@ static std::tuple<double, double, double, double> evaluate(
       double sum = 0;
       for(const auto& wc : sc.weak_classifiers)
       {
-        unsigned char feature_value = validation_set[i].first[wc.k];
+        int feature_value = validation_set[i].first[wc.k];
+        //std::cout << "feature value " << feature_value << std::endl;
+        //std::cout << "reg param " << wc.regression_parameters[feature_value] << std::endl;
         sum += wc.regression_parameters[feature_value];
       }
       if(sum < 0)
@@ -277,7 +279,7 @@ mblbp_classifier train(const std::string &positive_path,
           if(denominator != 0)
             wc.regression_parameters[j] = numerator / denominator;
           else
-            wc.regression_parameters[j] = 1;
+            wc.regression_parameters[j] = 0.5;
         }
         double wse = 0;
         for(std::size_t i = 0; i < training_set.size(); ++i)

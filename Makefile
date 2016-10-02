@@ -8,8 +8,7 @@ all:
 	@make --no-print-directory -j4 run
 
 run:
-	./build/train data/positive data/negative /tmp/classifier.txt
-	#./build/detect gfx/test.jpg classifiers/dumb.txt
+	./build/train data/positive data/negative /tmp/classifier.txt | tee train.log
 
 .PHONY: test
 test:
