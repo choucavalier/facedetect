@@ -277,10 +277,6 @@ mblbp_classifier train(const std::string &positive_path,
             << std::endl;
   std::cout << std::string(10, '-') << std::endl;
 
-  // weights initialization to 1 / n_samples
-  std::vector<double> weights(training_set.size());
-  std::fill_n(weights.begin(), training_set.size(), 1.0 / training_set.size());
-
   // current rates on validation set
   double detection_rate, tp_rate, tn_rate, fp_rate, fn_rate;
 
@@ -289,6 +285,10 @@ mblbp_classifier train(const std::string &positive_path,
   do
   {
     std::cout << "iteration #" << n_iter << std::endl;
+
+    // weights initialization to 1 / n_samples
+    std::vector<double> weights(training_set.size());
+    std::fill_n(weights.begin(), training_set.size(), 1.0 / training_set.size());
 
     strong_classifier new_strong_classifier;
 
@@ -368,12 +368,14 @@ mblbp_classifier train(const std::string &positive_path,
       for(std::size_t i = 0; i < weights.size(); ++i)
         weights[i] /= sum;
 
+
+      /*
       // calculate new detection and miss rates
       std::tie(tp_rate, tn_rate, fp_rate, fn_rate) = evaluate(classifier,
                                                               validation_set);
       detection_rate = tp_rate;
 
-      remove_true_and_false_negatives(classifier, training_set);
+
 
       std::cout << "detection_rate = " << detection_rate << std::endl;
       std::cout << "true positive = " << tp_rate << std::endl;
@@ -383,6 +385,7 @@ mblbp_classifier train(const std::string &positive_path,
       std::cout << "best_wse = " << best_wse << std::endl;
       std::cout << "training set size = " << training_set.size() << std::endl;
       std::cout << std::string(10, '-') << std::endl;
+      */
     }
 
     // add new strong_classifier to the mblbp_classifier
@@ -393,6 +396,8 @@ mblbp_classifier train(const std::string &positive_path,
                                                             validation_set);
     detection_rate = tp_rate;
 
+    remove_true_and_false_negatives(classifier, training_set);
+
     std::cout << "detection_rate = " << detection_rate << std::endl;
     std::cout << "true positive = " << tp_rate << std::endl;
     std::cout << "true negative = " << tn_rate << std::endl;
@@ -402,7 +407,7 @@ mblbp_classifier train(const std::string &positive_path,
     n_iter++;
 
   } while(classifier.strong_classifiers.size() < train_n_strong &&
-          (detection_rate < target_detection_rate || fp_rate > target_fp_rate));
+          (detection_rate < target_detection_rate || fp_rate > target_fp_rate ));
 
   return classifier;
 }
