@@ -265,7 +265,7 @@ mblbp_classifier train(const std::string &positive_path,
           wc_idx++)
       {
         weak_classifier &wc = all_weak_classifiers[wc_idx];
-        for(int j = 0; j < 255; ++j)
+        for(int j = 0; j < 256; ++j)
         {
           double numerator = 0, denominator = 0;
           for(std::size_t i = 0; i < training_set.size(); ++i)
@@ -310,7 +310,7 @@ mblbp_classifier train(const std::string &positive_path,
       //std::cout << "        block_h = " << bwc.feature.block_h << std::endl;
       //std::cout << "    k = " << bwc.k << std::endl;
       //std::cout << "    regression_parameters = [ ";
-      //for(int i = 0; i < 255; ++i)
+      //for(int i = 0; i < 256; ++i)
         //std::cout << bwc.regression_parameters[i] << " ";
       //std::cout << "]" << std::endl;
 

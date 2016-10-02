@@ -32,7 +32,7 @@ struct weak_classifier
                   const window &potential_window) const;
 
   mblbp_feature feature;
-  double regression_parameters[255];
+  double regression_parameters[256];
   int k;
 };
 

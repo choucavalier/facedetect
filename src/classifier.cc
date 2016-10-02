@@ -51,7 +51,7 @@ void save_classifier(const mblbp_classifier &classifier,
           << weak_classifier.feature.y << std::endl
           << weak_classifier.feature.block_w << std::endl
           << weak_classifier.feature.block_h << std::endl;
-      for(int i = 0; i < 255; ++i)
+      for(int i = 0; i < 256; ++i)
         ofs << weak_classifier.regression_parameters[i] << std::endl;
     }
   }
@@ -78,7 +78,7 @@ mblbp_classifier load_classifier(const std::string &classifier_path)
       ifs >> x >> y >> block_w >> block_h;
       mblbp_feature feature(x, y, block_w, block_h);
       weak_classifier wc = weak_classifier(feature);
-      for(int i = 0; i < 255; ++i)
+      for(int i = 0; i < 256; ++i)
         ifs >> wc.regression_parameters[i];
       sc.weak_classifiers.push_back(wc);
     }
