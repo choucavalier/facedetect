@@ -142,7 +142,7 @@ static data_t select_data_cascade(const data_t& training_set,
 
   char classification_label;
 
-  for ( training_example : training_set )
+  for (const auto& training_example : training_set)
   {
     classification_label = 1;
     for(const auto& sc : classifier.strong_classifiers)
@@ -160,17 +160,17 @@ static data_t select_data_cascade(const data_t& training_set,
       }
     }
 
-    if ( training_example.second == 1 )
+    if (training_example.second == 1)
       ++n_pos;
     else
       ++n_neg;
 
-    if ( classification_label == 1 )
+    if (classification_label == 1)
     {
-      if ( training_example.second == 1 )
-        positive_training_examples.push_back( training_example );
+      if (training_example.second == 1)
+        positive_training_examples.push_back(training_example);
       else
-        negative_training_examples.push_back( training_example );
+        negative_training_examples.push_back(training_example);
     }
   }
 
@@ -179,9 +179,9 @@ static data_t select_data_cascade(const data_t& training_set,
   std::cout << "negative training examples passed through classification : " << negative_training_examples.size();
   std::cout << " / " << n_neg << std::endl;
 
-  if ( positive_training_examples.size() < negative_training_examples.size() )
+  if (positive_training_examples.size() < negative_training_examples.size())
     negative_training_examples.resize(positive_training_examples.size());
-  if ( negative_training_examples.size() < positive_training_examples.size() )
+  if (negative_training_examples.size() < positive_training_examples.size())
     positive_training_examples.resize(negative_training_examples.size());
 
   std::cout << "selected number of positive training examples : " << positive_training_examples.size() << std::endl;
@@ -271,7 +271,7 @@ void remove_true_and_false_negatives(const mblbp_classifier &classifier,
   char classification_label;
 
   auto iter = training_set.begin();
-  while ( iter != training_set.end() )
+  while (iter != training_set.end())
   {
     classification_label = 1;
     for(const auto& sc : classifier.strong_classifiers)
@@ -289,8 +289,8 @@ void remove_true_and_false_negatives(const mblbp_classifier &classifier,
       }
     }
 
-    if ( classification_label == -1 )
-      iter = training_set.erase( iter );
+    if (classification_label == -1)
+      iter = training_set.erase(iter);
     else
       ++iter;
   }
@@ -464,9 +464,9 @@ mblbp_classifier train(const std::string &positive_path,
     remove_true_and_false_negatives(classifier, training_set);
 
     n_negative_examples = 0;
-    for ( auto iter : iteration_training_set )
+    for (auto iter : iteration_training_set)
     {
-      if ( iter.second != 1 )
+      if (iter.second != 1)
         ++n_negative_examples;
     }
 
