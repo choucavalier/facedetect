@@ -56,9 +56,10 @@ add_executable(test_io test/test_io.cc
 
 def main():
     output_str = CMAKELISTS_STR
+    build_options = []
 
     if len(sys.argv) == 1:
-        output_str = add_all(output_str)
+        output_str = add_all(output_str, build_options)
     else:
 
         for arg in sys.argv[1:]:
@@ -67,13 +68,13 @@ def main():
                 sys.exit(1)
 
         if "detection" in sys.argv:
-            output_str = add_detection(output_str)
+            output_str = add_detection(output_str, build_options)
         if "training" in sys.argv:
-            output_str = add_training(output_str)
+            output_str = add_training(output_str, build_options)
         if "preprocessing" in sys.argv:
-            output_str = add_preprocessing(output_str)
+            output_str = add_preprocessing(output_str, build_options)
         if "tests" in sys.argv:
-            output_str = add_tests(output_str)
+            output_str = add_tests(output_str, build_options)
 
     output_str += "\n"
 
@@ -86,35 +87,45 @@ def main():
     os.chdir("build")
     subprocess.check_call(["cmake", ".."])
     subprocess.check_call(["make"])
+
+    build_options_file = open('build_options.txt', 'w+')
+    for opt in build_options:
+        build_options_file.write(opt + "\n")
+    build_options_file.close()
+
     os.chdir("..")
     os.remove("CMakeLists.txt")
 
 
-def add_detection(output_str):
+def add_detection(output_str, build_options):
     output_str += "\n\n"
     output_str += DETECTION_STR
+    build_options.append("detection")
     return output_str
 
-def add_training(output_str):
+def add_training(output_str, build_options):
     output_str += "\n\n"
     output_str += TRAINING_STR
+    build_options.append("training")
     return output_str
 
-def add_preprocessing(output_str):
+def add_preprocessing(output_str, build_options):
     output_str += "\n\n"
     output_str += PREPROCESSING_STR
+    build_options.append("preprocessing")
     return output_str
 
-def add_tests(output_str):
+def add_tests(output_str, build_options):
     output_str += "\n\n"
     output_str += TESTS_STR
+    build_options.append("tests")
     return output_str
 
-def add_all(output_str):
-    output_str = add_detection(output_str)
-    output_str = add_training(output_str)
-    output_str = add_preprocessing(output_str)
-    output_str = add_tests(output_str)
+def add_all(output_str, build_options):
+    output_str = add_detection(output_str, build_options)
+    output_str = add_training(output_str, build_options)
+    output_str = add_preprocessing(output_str, build_options)
+    output_str = add_tests(output_str, build_options)
     return output_str
 
 if __name__ == '__main__':

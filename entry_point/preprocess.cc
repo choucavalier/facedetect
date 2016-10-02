@@ -17,6 +17,8 @@ int main()
     fs::path save_path = positive_path / directory_entry.path().filename();
     save_path.replace_extension(".png");
 
+    std::cout << directory_entry.path().string() << std::endl;
+
     cv::Mat img = cv::imread(directory_entry.path().string());
     cv::Mat resized;
     cv::resize(img, resized, window_size);
