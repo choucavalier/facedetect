@@ -12,10 +12,10 @@ find_package(OpenCV REQUIRED)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules/)
 
 set(CMAKE_CXX_COMPILER "g++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++14 -Wall -W -pedantic -g")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -W -pedantic -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++14 -lstdc++fs -Wall -W -pedantic")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -std=c++14 -lstdc++fs -Wall -W -pedantic")
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 include_directories(include)
@@ -82,6 +82,7 @@ def main():
     cmakelists_file.write(output_str)
     cmakelists_file.close()
 
+    os.putenv("CXX", "/usr/bin/gcc-6.2/bin/g++")
     subprocess.check_call(["rm", "-rf", "build"])
     subprocess.check_call(["mkdir", "build"])
     os.chdir("build")
