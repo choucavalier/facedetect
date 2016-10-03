@@ -521,8 +521,6 @@ void attentional_cascade_aux(strong_classifier &str_classifier,
     }
     else
     {
-      layer_count += 1;
-
       attentional_cascade_add_weak_classifier(str_classifier, training_set, validation_set, all_weak_classifiers,
                                               gamma_0_prime, sl, sl_trajectory, layer_count, u);
 
