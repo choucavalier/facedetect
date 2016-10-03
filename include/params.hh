@@ -25,4 +25,4 @@ const double gamma_0 = 0.01;
 const double gamma_l = 0.5;
 
 // targeted layer false negative
-const double beta_l = 0.005;
+const double beta_l = 0.05;

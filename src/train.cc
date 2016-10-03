@@ -144,11 +144,8 @@ static data_t select_data_cascade(const data_t& training_set,
 
   char classification_label;
 
-<<<<<<< 8c14f0cd337e854d4f99537c04cd28c47bebc8bc
-  for (const auto& training_example : training_set)
-=======
+
   for ( auto training_example : training_set )
->>>>>>> implemented strong classifier false positive / false negative layer tuning
   {
     classification_label = 1;
     for(const auto& sc : cascade.strong_classifiers)
@@ -167,12 +164,9 @@ static data_t select_data_cascade(const data_t& training_set,
       }
     }
 
-<<<<<<< 8c14f0cd337e854d4f99537c04cd28c47bebc8bc
-    if (training_example.second == 1)
-=======
+
 
     if ( training_example.second == 1 )
->>>>>>> implemented strong classifier false positive / false negative layer tuning
       ++n_pos;
     else
       ++n_neg;
@@ -198,12 +192,7 @@ static data_t select_data_cascade(const data_t& training_set,
   if (negative_training_examples.size() < positive_training_examples.size())
     positive_training_examples.resize(negative_training_examples.size());
 
-<<<<<<< 8c14f0cd337e854d4f99537c04cd28c47bebc8bc
-  std::cout << "selected number of positive training examples : "
-            << positive_training_examples.size() << std::endl;
-  std::cout << "selected number of negative training examples : "
-            << negative_training_examples.size() << std::endl;
-=======
+
   if ( positive_training_examples.size() > max_iteration_train_set_size )
     positive_training_examples.resize( max_iteration_train_set_size );
   if ( negative_training_examples.size() > max_iteration_train_set_size )
@@ -211,7 +200,6 @@ static data_t select_data_cascade(const data_t& training_set,
 
   std::cout << "selected number of positive training examples : " << positive_training_examples.size() << std::endl;
   std::cout << "selected number of negative training examples : " << negative_training_examples.size() << std::endl;
->>>>>>> implemented strong classifier false positive / false negative layer tuning
 
   data_t selected_data;
   selected_data.insert(selected_data.end(), positive_training_examples.begin(),
@@ -306,14 +294,10 @@ static std::tuple<double, double, double, double> evaluate(
   int n_tp = 0, n_tn = 0, n_fp = 0, n_fn = 0;
   char real_label, classification_label;
 
-<<<<<<< 8c14f0cd337e854d4f99537c04cd28c47bebc8bc
-  auto iter = training_set.begin();
-  while (iter != training_set.end())
-=======
+
   int n_positive = 0, n_negative = 0;
 
   for(int i = 0; i < n_samples; ++i)
->>>>>>> implemented strong classifier false positive / false negative layer tuning
   {
     real_label = validation_set[i].second;
     if(real_label == 1)
@@ -334,10 +318,6 @@ static std::tuple<double, double, double, double> evaluate(
       classification_label = -1;
     }
 
-<<<<<<< 8c14f0cd337e854d4f99537c04cd28c47bebc8bc
-    if (classification_label == -1)
-      iter = training_set.erase(iter);
-=======
     if(real_label == 1)
     {
       if(classification_label == 1)
@@ -345,7 +325,6 @@ static std::tuple<double, double, double, double> evaluate(
       else
         n_fn++;
     }
->>>>>>> implemented strong classifier false positive / false negative layer tuning
     else
     {
       if(classification_label == -1)
@@ -354,8 +333,6 @@ static std::tuple<double, double, double, double> evaluate(
         n_fp++;
     }
   }
-<<<<<<< 8c14f0cd337e854d4f99537c04cd28c47bebc8bc
-=======
 
 
   /*
@@ -371,7 +348,6 @@ static std::tuple<double, double, double, double> evaluate(
   auto rates = std::make_tuple(tp_rate, tn_rate, fp_rate, fn_rate);
 
   return rates;
->>>>>>> implemented strong classifier false positive / false negative layer tuning
 }
 
 mblbp_classifier train(const std::string &positive_path,
@@ -615,15 +591,7 @@ void train_strong_classifier(strong_classifier &str_classifier, data_t &training
     // add new weak_classifier to the strong_classifier
     str_classifier.weak_classifiers.push_back(best_weak_classifier);
 
-<<<<<<< 8c14f0cd337e854d4f99537c04cd28c47bebc8bc
-    remove_true_and_false_negatives(classifier, training_set);
 
-    n_negative_examples = 0;
-    for (auto iter : iteration_training_set)
-    {
-      if (iter.second != 1)
-        ++n_negative_examples;
-=======
     // update weights
     double sum = 0;
     for(std::size_t i = 0; i < weights.size(); ++i)
@@ -631,7 +599,6 @@ void train_strong_classifier(strong_classifier &str_classifier, data_t &training
       double value = bwc.regression_parameters[training_set[i].first[bwc.k]];
       weights[i] = weights[i] * std::exp(-training_set[i].second * value);
       sum += weights[i];
->>>>>>> implemented strong classifier false positive / false negative layer tuning
     }
 
     for(std::size_t i = 0; i < weights.size(); ++i)
