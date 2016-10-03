@@ -122,7 +122,7 @@ def add_all(output_str, build_options):
     output_str = add_detection(output_str, build_options)
     output_str = add_training(output_str, build_options)
     output_str = add_preprocessing(output_str, build_options)
-    output_str = add_tests(output_str, build_options)
+    #output_str = add_tests(output_str, build_options)
     return output_str
 
 if __name__ == '__main__':

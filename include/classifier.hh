@@ -56,6 +56,8 @@ struct strong_classifier
   bool classify(const cv::Mat &integral, const window &potential_window) const;
 
   std::vector<weak_classifier> weak_classifiers;
+  int n_weak_classifiers = 0;
+  double sl = 0.0;
 };
 
 struct mblbp_classifier

@@ -8,6 +8,8 @@ sudo apt-get install -y megatools
 rm -rf data
 mkdir data
 
+mkdir checkpoints
+
 # download positive data
 wget -O data/lfwcrop_grey.zip 'http://conradsanderson.id.au/lfwcrop/lfwcrop_grey.zip'
 unzip data/lfwcrop_grey.zip -d data/

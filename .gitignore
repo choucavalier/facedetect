@@ -37,3 +37,6 @@ CMakeLists.txt
 
 # Log files
 log_train.txt
+
+# Generated Data
+checkpoints/

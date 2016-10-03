@@ -22,7 +22,10 @@ bool strong_classifier::classify(const cv::Mat &integral,
   double sum = 0;
   for(const auto& weak_classifier : this->weak_classifiers)
     sum += weak_classifier.evaluate(integral, potential_window);
-  return sum > 0;
+  sum += this->sl;
+  if ( sum > 0.0 )
+    return 1.0;
+  return -1.0;
 }
 
 double weak_classifier::evaluate(const cv::Mat &integral,
@@ -34,15 +37,15 @@ double weak_classifier::evaluate(const cv::Mat &integral,
   return this->regression_parameters[feature_value];
 }
 
-void save_classifier(const mblbp_classifier &classifier,
+void save_classifier(const mblbp_classifier &cascade,
                      const std::string &output_path)
 {
   std::ofstream ofs(output_path);
 
   ofs << initial_window_w << std::endl
       << initial_window_h << std::endl
-      << classifier.strong_classifiers.size() << std::endl;
-  for(const auto& strong_classifier : classifier.strong_classifiers)
+      << cascade.strong_classifiers.size() << std::endl;
+  for(const auto& strong_classifier : cascade.strong_classifiers)
   {
     ofs << strong_classifier.weak_classifiers.size() << std::endl;
     for(const auto& weak_classifier : strong_classifier.weak_classifiers)
@@ -54,12 +57,14 @@ void save_classifier(const mblbp_classifier &classifier,
       for(int i = 0; i < 256; ++i)
         ofs << weak_classifier.regression_parameters[i] << std::endl;
     }
+    ofs << strong_classifier.sl << std::endl;
   }
+
 }
 
 mblbp_classifier load_classifier(const std::string &classifier_path)
 {
-  mblbp_classifier classifier;
+  mblbp_classifier cascade;
 
   std::ifstream ifs(classifier_path);
 
@@ -67,6 +72,7 @@ mblbp_classifier load_classifier(const std::string &classifier_path)
   ifs >> initial_window_w >> initial_window_h;
   int n_strong_classifiers;
   ifs >> n_strong_classifiers;
+  std::vector<strong_classifier> strong_classifiers;
   for(int sc_idx = 0; sc_idx < n_strong_classifiers; ++sc_idx)
   {
     strong_classifier sc;
@@ -82,8 +88,10 @@ mblbp_classifier load_classifier(const std::string &classifier_path)
         ifs >> wc.regression_parameters[i];
       sc.weak_classifiers.push_back(wc);
     }
-    classifier.strong_classifiers.push_back(sc);
+    double sl;
+    ifs >> sc.sl;
+    cascade.strong_classifiers.push_back(sc);
   }
 
-  return classifier;
+  return cascade;
 }
