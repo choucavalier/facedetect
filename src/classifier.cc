@@ -24,8 +24,8 @@ bool strong_classifier::classify(const cv::Mat &integral,
     sum += weak_classifier.evaluate(integral, potential_window);
   sum += this->sl;
   if ( sum > 0.0 )
-    return 1.0;
-  return -1.0;
+    return true;
+  return false;
 }
 
 double weak_classifier::evaluate(const cv::Mat &integral,

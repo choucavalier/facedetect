@@ -383,7 +383,7 @@ mblbp_classifier train(const std::string &positive_path,
   std::cout << estimate_memory_size(data) << " bytes in memory" << std::endl;
 
   // split dataset
-  std::size_t split_idx = 4 * data.size() / 5;
+  std::size_t split_idx = 9 * data.size() / 10;
   data_t training_set(data.begin(), data.begin() + split_idx);
   data_t validation_set(data.begin() + split_idx, data.end());
 
@@ -411,7 +411,7 @@ void attentional_cascade(mblbp_classifier &cascade,
     layer_count += 1;
     double sl = 0.0;
     bool sl_trajectory = 0;
-    double u = 0.1;
+    double u = 0.01;
 
     data_t iteration_training_set = select_data_cascade(training_set, cascade);
     shuffle_data(iteration_training_set);
@@ -443,8 +443,7 @@ void attentional_cascade_add_weak_classifier(strong_classifier &str_classifier,
                                              double &gamma_0_prime,
                                              double &sl, bool &sl_trajectory, int &layer_count, double &u)
 {
-  u = 0.1;
-  sl_trajectory = 0;
+  u = 0.01;
 
   str_classifier.n_weak_classifiers += 1;
   train_strong_classifier(str_classifier, training_set, all_weak_classifiers);
@@ -513,7 +512,7 @@ void attentional_cascade_aux(strong_classifier &str_classifier,
   }
   else
   {
-    std::cout << "finished" << " , u : " << u << " , sl : " << sl;
+    std::cout << "weak classifier" << " , u : " << u << " , sl : " << sl;
     std::cout << " , gamma_l_prime : " << gamma_l_prime << " , beta_l_prime : " << beta_l_prime << std::endl;
     if ( layer_count > std::min(10*layer_count + 10 , 200) )
     {

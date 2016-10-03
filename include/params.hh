@@ -16,10 +16,10 @@ const double target_fp_rate = 0.01;
 // number of weak classifiers to select per strong classifier
 const int train_n_weak_per_strong = 10;
 
-const int max_iteration_train_set_size = 1000;
+const int max_iteration_train_set_size = 2000;
 
 // desired overall false positive rate
-const double gamma_0 = 0.01;
+const double gamma_0 = 0.001;
 
 // targeted layer false positive
 const double gamma_l = 0.5;
