@@ -1,8 +1,11 @@
 #include "params.hh"
 #include "window.hh"
 
+#include <iostream>
+
 std::vector<window> get_potential_windows(const int img_w, const int img_h)
 {
+  std::cout << "getting potential windows : " << img_w << " , " << img_h << std::endl;
   std::vector<window> potential_windows;
 
   double w = initial_window_w; // current window width
@@ -11,9 +14,11 @@ std::vector<window> get_potential_windows(const int img_w, const int img_h)
 
   while(w <= max_window_w && h <= max_window_h)
   {
-    for(double x = 0.0; x < img_w - w; x += scale * shift_delta)
-      for(double y = 0.0; y < img_h - h; y += scale * shift_delta)
+    for(double x = 0.0; x < static_cast<double>(img_w) - w; x += 5.0)
+    {
+      for(double y = 0.0; y < static_cast<double>(img_h) - h; y += 5.0)
         potential_windows.push_back(window(x, y, w, h, scale));
+    }
 
     // update values for next loop
     scale = scale * scaling_factor;

@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <opencv2/opencv.hpp>
+
 #include "detect.hh"
 
 int main(int argc, char **argv)
@@ -18,9 +20,23 @@ int main(int argc, char **argv)
 
   std::vector<bbox> bounding_boxes = detect(img_path, classifier_path);
 
-  //for(const auto& box : bounding_boxes)
-  //{
-    //std::cout << "face at (x = " << box.x << ", y = " << box.y << ") "
-              //<< "width: " << box.w << ", height = " << box.h << std::endl;
-  //}
+  cv::Mat img = cv::imread(img_path);
+
+  for(const auto& box : bounding_boxes)
+  {
+    /*
+    std::cout << "face at (x = " << box.x << ", y = " << box.y << ") "
+              << "width: " << box.w << ", height = " << box.h << std::endl;
+    */
+    cv::rectangle(
+        img,
+        cv::Point(box.x, box.y),
+        cv::Point(box.x + box.w, box.y + box.h),
+        cv::Scalar(0, 255, 0)
+    );
+
+  }
+
+  cv::imwrite("output.jpg", img);
+
 }
