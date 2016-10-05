@@ -1,0 +1,134 @@
+\documentclass[10pt]{article}
+
+% packages
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{graphics}
+\usepackage{epstopdf}
+\usepackage{enumitem}
+\usepackage{color}
+\usepackage{minted}
+\usepackage{cite}
+\usepackage[hidelinks]{hyperref}
+\usepackage[xindy, toc, acronym, nonumberlist]{glossaries}
+\usepackage{titling}
+
+% font settings
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,french]{babel}
+\usepackage[babel=true,kerning=true]{microtype}
+%\usepackage[urw-garamond]{mathdesign}
+%\usepackage{garamondx}
+%\usepackage[scaled]{beramono}
+%\usepackage{titlesec}
+%\titleformat{\section}[hang]{\normalfont\scshape\filcenter}{\thesection.}{1em}{}
+%\renewcommand{\thesection}{\Roman{section}}
+
+% figures
+\usepackage[subpreambles]{standalone}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{arrows}
+
+\definecolor{gray}{RGB}{155,155,155}
+
+%\usepackage[sc]{mathpazo}
+%\linespread{1.05}
+
+\newminted{cpp}{bgcolor=gray!15,fontsize=\footnotesize,mathescape,frame=lines,framerule=0.3pt}
+
+
+\include{glossary}
+\makeglossaries
+
+\setglossarystyle{long}
+
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+
+\binoppenalty=10000
+\relpenalty=10000
+
+\sloppy
+
+\begin{document}
+
+\selectlanguage{english}
+
+\title{
+    Boosted Multi-block LBP Face Detection
+}
+
+\author{
+    James Batten $\quad$ Valentin Iovene \\
+    \texttt{batten\_j@epita.fr} $\quad$ \texttt{toogy@lrde.epita.fr}
+}
+
+\def\tightlist{}
+
+\begin{titlingpage}
+    \maketitle
+
+    Face detection is the task of localizing faces in images. One must
+    distinguish between face \emph{detection} and face \emph{recognition}. The
+    latter is the task of recognizing someone from an image of her face. \\
+
+    Face detection can be seen as a function $f$ taking an image as input and
+    returning \emph{bounding boxes} around the faces contained in this image. \\
+
+    \begin{center}
+        \includestandalone[width=8cm]{figures/face-detection-diagram/figure}
+    \end{center}
+
+    Face detection
+
+    \begin{itemize}
+
+        \item is used by \emph{Facebook} to detect faces in images you share and
+            make it easier for you to tag your friends,
+
+        \item can be used to \textbf{track} faces in videos of people moving
+            around (e.g. \emph{Snapchat}'s face swap feature requires face
+            detection),
+
+        \item and is a prerequisite for any real-life applications of face
+            recognition \emph{(e.g. Law Enforcement localizing a suspect in a
+            big city using video surveillance systems)}.
+
+    \end{itemize}
+
+    The detection process needs to be fast enough to keep up with the demand
+    (millions of users or streamed images). \\
+
+    There has been extensive research in this area but one of the major
+    breakthrough happened in 2001 when \emph{Paul Viola} and \emph{Michael
+    Jones} published their object detection framework \cite{viola} (which was
+    named the "Viola-Jones framework").
+
+    Even though it was invented more than 15 years ago \emph{(time of writing)},
+    \emph{OpenCV}'s face detection implementation (source) is still based on it.
+    \\
+
+    This article explains how the \emph{Multi-Block Local Binary Patterns
+    (MB-LBP)} visual descriptors (which will soon be introduced) can be used in
+    lieu of the \emph{Haar-like features} used by the original
+    \emph{Viola-Jones} framework for face detection. This approach was
+    demonstrated by Zhang et al. in 2007. \cite{Liao2007}
+\end{titlingpage}
+
+\tableofcontents
+
+\include{facedetect}
+\nocite{*}
+
+\printglossary
+\clearpage
+\printglossary[type=acronym,style=long]
+
+\clearpage
+
+\bibliographystyle{abbrv}
+\bibliography{bibliography}{}
+
+\end{document}
