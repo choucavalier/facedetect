@@ -15,10 +15,8 @@ std::vector<window> get_potential_windows(const int img_w, const int img_h)
   while(w <= max_window_w && h <= max_window_h)
   {
     for(double x = 0.0; x < static_cast<double>(img_w) - w; x += shift)
-    {
       for(double y = 0.0; y < static_cast<double>(img_h) - h; y += shift)
         potential_windows.push_back(window(x, y, w, h, scale));
-    }
 
     // update values for next loop
     w = w * scaling_factor;
