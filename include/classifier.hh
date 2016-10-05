@@ -80,6 +80,18 @@ struct mblbp_classifier
   bool classify(const cv::Mat &integral, const window &potential_window) const;
 
   std::vector<strong_classifier> strong_classifiers;
+
+  // desired overall false positive rate
+  double gamma_0;
+
+  // targeted layer false positive
+  double gamma_l;
+
+  // targeted layer false negative
+  double beta_l;
+
+  // current overall false positive rate
+  double gamma_0_prime = 1.0;
 };
 
 /* Save a learned classifier to a file

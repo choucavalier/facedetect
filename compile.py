@@ -80,7 +80,7 @@ def main():
     subprocess.check_call(["mkdir", "build"])
     os.chdir("build")
     subprocess.check_call(["cmake", ".."])
-    subprocess.check_call(["make"])
+    subprocess.check_call(["make", "-j8"])
 
     build_options_file = open('build_options.txt', 'w+')
     for opt in build_options:

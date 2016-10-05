@@ -239,15 +239,20 @@ static std::tuple<double, double, double, double> evaluate(
       n_negative++;
     // calculate classification_label
 
+    //std::cout << "<DEBUG>" << std::endl;
+    //std::cout << "number of strong classifiers : " << classifier.strong_classifiers.size() << std::endl;
     classification_label = 1;
     for(const auto& sc : classifier.strong_classifiers)
     {
+      //std::cout << "number of weak classifiers : " << sc.weak_classifiers.size() << std::endl;
       double sum = 0;
       for(const auto& wc : sc.weak_classifiers)
       {
+        //std::cout << "wc.k : " << wc.k << std::endl;
         int feature_value = validation_set[i].first[wc.k];
         sum += wc.regression_parameters[feature_value];
       }
+      //std::cout << "sc.sl : " << sc.sl << std::endl;
       sum += sc.sl;
       if(sum < 0)
       {
@@ -255,6 +260,7 @@ static std::tuple<double, double, double, double> evaluate(
         break;
       }
     }
+    //std::cout << "</DEBUG>" << std::endl;
 
 
     if(real_label == 1)
@@ -350,7 +356,8 @@ static std::tuple<double, double, double, double> evaluate(
   return rates;
 }
 
-mblbp_classifier train(const std::string &positive_path,
+mblbp_classifier train(mblbp_classifier &cascade,
+                       const std::string &positive_path,
                        const std::string &negative_path)
 {
   std::cout << std::string(10, '-') << std::endl;
@@ -359,7 +366,6 @@ mblbp_classifier train(const std::string &positive_path,
   std::cout << "using " << initial_window_w << "x" << initial_window_h
             << " windows" << std::endl;
 
-  mblbp_classifier cascade;
 
   // retrieve all features for the configured initial window size
   auto all_features = mblbp_all_features();
@@ -393,6 +399,15 @@ mblbp_classifier train(const std::string &positive_path,
 
   std::cout << std::string(10, '-') << std::endl;
 
+  double detection_rate, tp_rate, tn_rate, fp_rate, fn_rate;
+  std::tie(tp_rate, tn_rate, fp_rate, fn_rate) = evaluate(cascade, validation_set);
+  cascade.gamma_0_prime = fp_rate;
+  std::cout << "true positive = " << tp_rate << std::endl;
+  std::cout << "true negative = " << tn_rate << std::endl;
+  std::cout << "false positive = " << fp_rate << std::endl;
+  std::cout << "false negative = " << fn_rate << std::endl;
+
+
   attentional_cascade(cascade, training_set, validation_set, all_weak_classifiers);
 
   return cascade;
@@ -403,10 +418,9 @@ void attentional_cascade(mblbp_classifier &cascade,
                          data_t &validation_set,
                          std::vector<weak_classifier>& all_weak_classifiers)
 {
-  double gamma_0_prime = 1.0;
-  int layer_count = 0;
+  int layer_count = cascade.strong_classifiers.size();
 
-  while ( gamma_0_prime > gamma_0 )
+  while ( cascade.gamma_0_prime > cascade.gamma_0 )
   {
     layer_count += 1;
     double sl = 0.0;
@@ -416,13 +430,19 @@ void attentional_cascade(mblbp_classifier &cascade,
     data_t iteration_training_set = select_data_cascade(training_set, cascade);
     shuffle_data(iteration_training_set);
 
+    // each strong classifier can chose from the set of all weak classifiers
+    std::vector<weak_classifier> iteration_weak_classifiers = all_weak_classifiers;
+
     std::cout << "creating layer " << layer_count << std::endl;
+    std::cout << "target false positive rate : " << cascade.gamma_l << std::endl;
+    std::cout << "target false negative rate : " << cascade.beta_l << std::endl;
     strong_classifier str_classifier;
-    attentional_cascade_add_weak_classifier(str_classifier, iteration_training_set, validation_set, all_weak_classifiers, gamma_0_prime,
+    attentional_cascade_add_weak_classifier(cascade, str_classifier, iteration_training_set, validation_set, iteration_weak_classifiers,
                                             sl, sl_trajectory, layer_count, u);
 
     cascade.strong_classifiers.push_back(str_classifier);
 
+    std::cout << "evaluating cascade on validation set" << std::endl;
     double detection_rate, tp_rate, tn_rate, fp_rate, fn_rate;
     std::tie(tp_rate, tn_rate, fp_rate, fn_rate) = evaluate(cascade, validation_set);
     std::cout << "true positive = " << tp_rate << std::endl;
@@ -436,25 +456,33 @@ void attentional_cascade(mblbp_classifier &cascade,
   }
 }
 
-void attentional_cascade_add_weak_classifier(strong_classifier &str_classifier,
+// creates a weak classifier to add to the strong classifier,
+// then adjusts the overall strong classifier to approach target layer fp and fn rates
+void attentional_cascade_add_weak_classifier(mblbp_classifier &cascade,
+                                             strong_classifier &str_classifier,
                                              data_t &training_set,
                                              data_t &validation_set,
                                              std::vector<weak_classifier>& all_weak_classifiers,
-                                             double &gamma_0_prime,
                                              double &sl, bool &sl_trajectory, int &layer_count, double &u)
 {
   u = 0.01;
 
-  str_classifier.n_weak_classifiers += 1;
-  train_strong_classifier(str_classifier, training_set, all_weak_classifiers);
-  attentional_cascade_aux(str_classifier, training_set, validation_set, all_weak_classifiers, gamma_0_prime, sl, sl_trajectory, layer_count, u);
+  if ( all_weak_classifiers.size() > 0 )
+  {
+    strong_classifier_add_weak_classifier(str_classifier, training_set, all_weak_classifiers);
+    strong_classifier_adjust(cascade, str_classifier, training_set, validation_set, all_weak_classifiers, sl, sl_trajectory, layer_count, u);
+  }
+  else
+  {
+    std::cout << "error, no more weak classifiers can be added to this strong classifer" << std::endl;
+  }
 }
 
-void attentional_cascade_aux(strong_classifier &str_classifier,
+void strong_classifier_adjust(mblbp_classifier &cascade,
+                             strong_classifier &str_classifier,
                              data_t &training_set,
                              data_t &validation_set,
                              std::vector<weak_classifier>& all_weak_classifiers,
-                             double &gamma_0_prime,
                              double &sl, bool &sl_trajectory, int &layer_count, double &u)
 {
   double detection_rate, tp_rate, tn_rate, fp_rate, fn_rate;
@@ -470,21 +498,13 @@ void attentional_cascade_aux(strong_classifier &str_classifier,
   double gamma_l_prime = std::max(gamma_g, gamma_e);
   double beta_l_prime = std::max(beta_g, beta_e);
 
-  //std::cout << "beta_g : " << beta_g << "  ,  beta_e : " << beta_e << std::endl;
+  //std::cout << "gamma_g : " << gamma_g << " , gamma_e : " << gamma_e << " , beta_g : " << beta_g << " , beta_e : " << beta_e << std::endl;
 
-  //std::cout << "current layer false positive rate : " << gamma_l_prime << std::endl;
-  //std::cout << "current layer false negative rate : " << beta_l_prime << std::endl;
+  //std::cout << "gamma_l_prime : " << gamma_l_prime << " , beta_l_prime : " << beta_l_prime << " , sl : " << sl << std::endl;
 
-
-  //std::cout << "u : " << u << " , " << "sl : " << sl << " , " << "sl_trajectory : " << sl_trajectory << std::endl;
-  //std::cout << "gamma_g : " << gamma_g << " , beta_g : " << beta_g << " , gamma_e : " << gamma_e << " , beta_e : " << beta_e << std::endl;
-  //std::cout << "gamma_l_prime : " << gamma_l_prime << " , " << "beta_l_prime : " << beta_l_prime << std::endl;
-
-  //std::cout << "layer count : " << layer_count << std::endl;
-
-  if ( gamma_l_prime <= gamma_l && 1.0 - beta_l_prime >= 1.0 - beta_l )
-    gamma_0_prime *= gamma_l_prime;
-  else if ( gamma_l_prime <= gamma_l && 1.0 - beta_l_prime < 1.0 - beta_l && u > 0.00001 )
+  if ( gamma_l_prime <= cascade.gamma_l && 1.0 - beta_l_prime >= 1.0 - cascade.beta_l )
+    cascade.gamma_0_prime *= gamma_l_prime;
+  else if ( gamma_l_prime <= cascade.gamma_l && 1.0 - beta_l_prime < 1.0 - cascade.beta_l && u > 0.00001 )
   {
     sl += u;
     if ( !sl_trajectory )
@@ -494,10 +514,10 @@ void attentional_cascade_aux(strong_classifier &str_classifier,
     }
     sl_trajectory = 1;
     str_classifier.sl = sl;
-    attentional_cascade_aux(str_classifier, training_set, validation_set, all_weak_classifiers,
-                            gamma_0_prime, sl, sl_trajectory, layer_count, u);
+    strong_classifier_adjust(cascade, str_classifier, training_set, validation_set, all_weak_classifiers,
+                            sl, sl_trajectory, layer_count, u);
   }
-  else if ( gamma_l_prime > gamma_l && 1.0 - beta_l_prime >= 1.0 - beta_l && u > 0.00001 )
+  else if ( gamma_l_prime > cascade.gamma_l && 1.0 - beta_l_prime >= 1.0 - cascade.beta_l && u > 0.00001 )
   {
     sl -= u;
     if ( sl_trajectory )
@@ -507,27 +527,27 @@ void attentional_cascade_aux(strong_classifier &str_classifier,
     }
     sl_trajectory = 0;
     str_classifier.sl = sl;
-    attentional_cascade_aux(str_classifier, training_set, validation_set, all_weak_classifiers,
-                            gamma_0_prime, sl, sl_trajectory, layer_count, u);
+    strong_classifier_adjust(cascade, str_classifier, training_set, validation_set, all_weak_classifiers,
+                            sl, sl_trajectory, layer_count, u);
   }
   else
   {
-    std::cout << "weak classifier" << " , u : " << u << " , sl : " << sl;
-    std::cout << " , gamma_l_prime : " << gamma_l_prime << " , beta_l_prime : " << beta_l_prime << std::endl;
+    std::cout << "weak classifier " << str_classifier.n_weak_classifiers << " : ";
+    std::cout << "layer false positive rate : " << gamma_l_prime << " , layer false negative rate : " << beta_l_prime << std::endl;
     if ( layer_count > std::min(10*layer_count + 10 , 200) )
     {
       // finished layer
     }
     else
     {
-      attentional_cascade_add_weak_classifier(str_classifier, training_set, validation_set, all_weak_classifiers,
-                                              gamma_0_prime, sl, sl_trajectory, layer_count, u);
+      attentional_cascade_add_weak_classifier(cascade, str_classifier, training_set, validation_set, all_weak_classifiers,
+                                              sl, sl_trajectory, layer_count, u);
 
     }
   }
 }
 
-void train_strong_classifier(strong_classifier &str_classifier, data_t &training_set, std::vector<weak_classifier>& all_weak_classifiers)
+void strong_classifier_add_weak_classifier(strong_classifier &str_classifier, data_t &training_set, std::vector<weak_classifier>& all_weak_classifiers)
 {
   //std::cout << "training strong classifier with " << str_classifier.n_weak_classifiers << " weak classifiers" << std::endl;
   //std::cout << "training set size : " << training_set.size() << std::endl;
@@ -535,71 +555,68 @@ void train_strong_classifier(strong_classifier &str_classifier, data_t &training
   std::vector<double> weights(training_set.size());
   std::fill_n(weights.begin(), training_set.size(), 1.0 / training_set.size());
 
-  // select train_n_weak_per_strong weak classifiers
-  for(int n_weak = 0; n_weak < str_classifier.n_weak_classifiers; ++n_weak)
+  int best_idx = -1; // index of the best weak_classifier (smallest wse)
+  double best_wse; // current smallest (best) wse, used to update best_idx
+  // update all weak classifiers regression parameters
+  #pragma omp parallel for
+  for(std::size_t wc_idx = 0 ; wc_idx < all_weak_classifiers.size();
+      wc_idx++)
   {
-    int best_idx = -1; // index of the best weak_classifier (smallest wse)
-    double best_wse; // current smallest (best) wse, used to update best_idx
-    // update all weak classifiers regression parameters
-    #pragma omp parallel for
-    for(std::size_t wc_idx = 0 ; wc_idx < all_weak_classifiers.size();
-        wc_idx++)
+    weak_classifier &wc = all_weak_classifiers[wc_idx];
+    for(int j = 0; j < 256; ++j)
     {
-      weak_classifier &wc = all_weak_classifiers[wc_idx];
-      for(int j = 0; j < 256; ++j)
-      {
-        double numerator = 0, denominator = 0;
-        for(std::size_t i = 0; i < training_set.size(); ++i)
-        {
-          if(training_set[i].first[wc.k] == j)
-          {
-            numerator += weights[i] * training_set[i].second;
-            denominator += weights[i];
-          }
-        }
-        if(denominator != 0)
-          wc.regression_parameters[j] = numerator / denominator;
-        else
-          wc.regression_parameters[j] = 0.0;
-      }
-      double wse = 0;
+      double numerator = 0, denominator = 0;
       for(std::size_t i = 0; i < training_set.size(); ++i)
       {
-        double value = wc.regression_parameters[training_set[i].first[wc.k]];
-        wse += weights[i] * std::pow(value - training_set[i].second, 2);
-      }
-      #pragma omp critical(best_wse_update)
-      {
-        if(best_idx < 0 || wse < best_wse)
+        if(training_set[i].first[wc.k] == j)
         {
-          best_wse = wse;
-          best_idx = wc_idx;
+          numerator += weights[i] * training_set[i].second;
+          denominator += weights[i];
         }
       }
+      if(denominator != 0)
+        wc.regression_parameters[j] = numerator / denominator;
+      else
+        wc.regression_parameters[j] = 0.0;
     }
-    //std::cout << "best wse " << best_wse << "  " << n_weak << " / " << train_n_weak_per_strong << std::endl;
-    // get a copy of the best weak_classifier before deleting it
-    weak_classifier best_weak_classifier(all_weak_classifiers[best_idx]);
-
-    weak_classifier &bwc = best_weak_classifier;
-
-    // delete selected weak_classifier from the whole set
-    all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
-    // add new weak_classifier to the strong_classifier
-    str_classifier.weak_classifiers.push_back(best_weak_classifier);
-
-
-    // update weights
-    double sum = 0;
-    for(std::size_t i = 0; i < weights.size(); ++i)
+    double wse = 0;
+    for(std::size_t i = 0; i < training_set.size(); ++i)
     {
-      double value = bwc.regression_parameters[training_set[i].first[bwc.k]];
-      weights[i] = weights[i] * std::exp(-training_set[i].second * value);
-      sum += weights[i];
+      double value = wc.regression_parameters[training_set[i].first[wc.k]];
+      wse += weights[i] * std::pow(value - training_set[i].second, 2);
     }
-
-    for(std::size_t i = 0; i < weights.size(); ++i)
-      weights[i] /= sum;
+    #pragma omp critical(best_wse_update)
+    {
+      if(best_idx < 0 || wse < best_wse)
+      {
+        best_wse = wse;
+        best_idx = wc_idx;
+      }
+    }
   }
+  //std::cout << "best wse " << best_wse << "  " << n_weak << " / " << train_n_weak_per_strong << std::endl;
+  // get a copy of the best weak_classifier before deleting it
+  weak_classifier best_weak_classifier(all_weak_classifiers[best_idx]);
+
+  weak_classifier &bwc = best_weak_classifier;
+
+  // delete selected weak_classifier from the whole set ( for this iteration / strong classifier )
+  all_weak_classifiers.erase(all_weak_classifiers.begin() + best_idx);
+  // add new weak_classifier to the strong_classifier
+  str_classifier.n_weak_classifiers += 1;
+  str_classifier.weak_classifiers.push_back(best_weak_classifier);
+
+
+  // update weights
+  double sum = 0;
+  for(std::size_t i = 0; i < weights.size(); ++i)
+  {
+    double value = bwc.regression_parameters[training_set[i].first[bwc.k]];
+    weights[i] = weights[i] * std::exp(-training_set[i].second * value);
+    sum += weights[i];
+  }
+
+  for(std::size_t i = 0; i < weights.size(); ++i)
+    weights[i] /= sum;
 
 }

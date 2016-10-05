@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+import glob
 
 def check_build():
     if not os.path.exists("build/"):
@@ -21,6 +22,9 @@ def check_build():
     return True
 
 
+if not os.path.exists("checkpoints"):
+    os.makedirs("checkpoints")
+
 if not check_build():
     subprocess.check_call(["./compile.py"])
 
@@ -32,4 +36,11 @@ else:
         subprocess.check_call(["./build/preprocess"])
         subprocess.check_call(["rm", "-rf", "data/lfwcrop_grey/"])
 
-subprocess.check_call(["./build/train", "data/positive", "data/negative", "/tmp/classifier.txt", "|", "tee", "log_train.txt"])
+
+cascades = list(glob.iglob('checkpoints/*.dat'))
+
+if len(cascades) > 0:
+    most_recent_cascade = min(cascades, key=os.path.getctime)
+    subprocess.check_call(["./build/train", "data/positive", "data/negative", most_recent_cascade])
+else:
+    subprocess.check_call(["./build/train", "data/positive", "data/negative"])
