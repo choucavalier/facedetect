@@ -40,7 +40,7 @@ else:
 cascades = list(glob.iglob('checkpoints/*.dat'))
 
 if len(cascades) > 0:
-    most_recent_cascade = min(cascades, key=os.path.getctime)
+    most_recent_cascade = max(cascades, key=os.path.getctime)
     subprocess.check_call(["./build/train", "data/positive", "data/negative", most_recent_cascade])
 else:
     subprocess.check_call(["./build/train", "data/positive", "data/negative"])
