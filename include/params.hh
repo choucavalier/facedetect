@@ -19,7 +19,7 @@ const int train_n_weak_per_strong = 10;
 const int max_iteration_train_set_size = 2000;
 
 // desired overall false positive rate
-const double gamma_0 = 0.001;
+const double gamma_0 = 0.00001;
 
 // targeted layer false positive
 const double gamma_l = 0.5;
