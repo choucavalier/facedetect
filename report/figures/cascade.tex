@@ -1,0 +1,22 @@
+\documentclass[tikz,convert={outfile=\jobname.svg}]{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\begin{document}
+\pagestyle{empty}
+%
+\begin{tikzpicture}[level distance=0.8cm,
+    level 1/.style={sibling distance=3cm},
+    level 2/.style={sibling distance=1.5cm}]
+    \node {$s_0$}
+    child {node {$0$}}
+    child {node {$s_1$}
+        child {node {$0$}}
+        child {node {$s_3$}
+            child {node{$0$}}
+            child {node {$1$}}
+        }
+    };
+\end{tikzpicture}
+
+\end{document}

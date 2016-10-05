@@ -10,7 +10,7 @@ It is important to note that the detection  is developed for a very
 specific window size, say $20 \times 20$ pixels, and this window is then
 shifted and scaled in the detection procedure in order to detect faces of
 different sizes and at different locations in the image. We will refer to this
-unshifted and unscaled window as the *window of reference*.
+unshifted and unscaled window as the *window of reference*. \newline
 
 ## Multi-block Local Binary Patterns
 
@@ -72,7 +72,32 @@ std::vector<mblbp_feature> mblbp_all_features()
 }
 \end{cppcode}
 
-## Feature selection using Gentle Adaboost
+Tweaking the different parameters (minimum and maximum block sizes and the
+dimensions of the window of reference) changes the number of features
+considered by the algorithm. The smaller the number of features, the faster the
+training process.
+
+## Classification
+
+The classification is achieved by a cascade of binary classifiers, also called
+"stages" or "strong classifiers". Each "stage" gives its opinion about whether
+the image contains a face and for the image to be classified as a face, all
+stages must respond positively. If one of them responds negatively, the
+classification stops there and the next stages are not triggered.
+
+\begin{center}
+    \includestandalone[width=3cm]{figures/cascade}
+\end{center}
+
+## Feature selection using Adaboost
+
+From the whole set of possible MB-LBP features in a window, only a combination
+of a subset of features is useful to detect faces. The Adaboost algorithm is
+used to select significant features and construct a binary classifier. The
+training procedure is described in the following sections. Adaboost is used to
+construct weak classifiers, each of which is based on one of the selected
+features and for boosting the weak classifiers into a strong classifier.
+
 
 # Detection procedure
 
