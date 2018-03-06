@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -x
 
 # TODO : install opencv
 
@@ -11,7 +12,7 @@ mkdir data
 mkdir checkpoints
 
 # download positive data
-wget -O data/lfwcrop_grey.zip 'http://conradsanderson.id.au/lfwcrop/lfwcrop_grey.zip'
+wget -4 -O data/lfwcrop_grey.zip 'http://conradsanderson.id.au/lfwcrop/lfwcrop_grey.zip'
 unzip data/lfwcrop_grey.zip -d data/
 rm data/lfwcrop_grey.zip
 
