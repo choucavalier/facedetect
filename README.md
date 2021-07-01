@@ -1,5 +1,7 @@
 # facedetect
 
+--- WORK IN PROGRESS ---
+
 ## What it is
 
 MB-LBP based face detection
